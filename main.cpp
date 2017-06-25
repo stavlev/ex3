@@ -7,11 +7,11 @@ using namespace std;
 using namespace HamsterAPI;
 
 #define ROBOT_SIZE_IN_CM 20
-#define X_START 15
-#define Y_START 15
+#define X_START 430
+#define Y_START 480
 #define YAW_START 15
-#define X_GOAL 200
-#define Y_GOAL 200
+#define X_GOAL 460
+#define Y_GOAL 370
 
 int main()
 {
