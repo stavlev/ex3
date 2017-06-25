@@ -31,19 +31,10 @@ int main()
 				Map map = Map(&occupancyGrid, ROBOT_SIZE_IN_CM, startLocation, goalLocation);
 				//map.PrintInflatedCvMat();
 
-				PathPlanner pathPlanner;
 				Grid grid = map.grid;
 
-				string route = pathPlanner.FindAStarPath(
-						grid.GetGridStartLocation().y,
-						grid.GetGridStartLocation().x,
-						grid.GetGridGoalLocation().y,
-						grid.GetGridGoalLocation().x,
-						grid.GetGrid(),
-						grid.GetGridHeight(),
-						grid.GetGridWidth());
-
-				pathPlanner.PrintPath(grid, route);
+				PathPlanner pathPlanner = PathPlanner(&grid);
+				pathPlanner.PrintRouteCvMat();
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{

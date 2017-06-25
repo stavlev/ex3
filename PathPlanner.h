@@ -30,11 +30,24 @@ static int dirY[dirNum]={0,	1, 1,  1,  0, -1, -1, -1};
 static priority_queue<Node, std::vector<Node>, NodePriorityComparer> openNodesQueues[2];
 
 class PathPlanner {
+private:
+	Grid grid;
+	int startRow;
+	int startCol;
+	int goalRow;
+	int goalCol;
+	vector< vector<bool> > occupationMap;
+	int height;
+	int width;
+	string plannedRoute;
+	cv::Mat_<cv::Vec3b> routeCvMat;
+	void InitMapWithRoute();
+	void ColorPixelByCellValue(int currentCellValue, int i, int j);
+
 public:
-	string FindAStarPath(const int nRowStart, const int nColStart,
-						 const int nRowFinish, const int nColFinish,
-						 vector< vector<bool> > grid, const int height, const int width);
-	void PrintPath(Grid grid, string route);
+	PathPlanner(Grid * grid);
+	string FindAStarPath();
+	void PrintRouteCvMat();
 	virtual ~PathPlanner();
 };
 

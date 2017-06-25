@@ -11,18 +11,25 @@ using namespace HamsterAPI;
 #define ROUTE 3
 #define FINISH 4
 
-string PathPlanner::FindAStarPath(
-		const int nRowStart, const int nColStart,
-		const int nRowFinish, const int nColFinish,
-		vector<vector<bool> > gridMap,
-		const int Height, const int Width)
+PathPlanner::PathPlanner(Grid * grid)
 {
-	vector<vector <int> > closed_nodes_map;	// map of closed (tried-out) nodes
-	vector<vector <int> > open_nodes_map;	// map of open (not-yet-tried) nodes
-	//int closed_nodes_map[Height][Width];	// map of closed (tried-out) nodes
-	//int open_nodes_map[Height][Width];		// map of open (not-yet-tried) nodes
+	this->startRow=grid->GetGridStartLocation().y;
+	this->startCol=grid->GetGridStartLocation().x;
+	this->goalRow=grid->GetGridGoalLocation().y;
+	this->goalCol=grid->GetGridGoalLocation().x;
+	this->occupationMap=grid->GetGrid();
+	this->height=grid->GetGridHeight();
+	this->width=grid->GetGridWidth();
 
-	int dir_map[Height][Width];
+	plannedRoute = FindAStarPath();
+	InitMapWithRoute();
+}
+
+string PathPlanner::FindAStarPath()
+{
+	vector<vector<int> > closed_nodes_map;	// map of closed (tried-out) nodes
+	vector<vector<int> > open_nodes_map;	// map of open (not-yet-tried) nodes
+	vector<vector<int> > all_possible_directions;// map of all possible directions
 
 	static int smallerPQIndex;
 	static Node* nNodeA;
@@ -31,19 +38,21 @@ string PathPlanner::FindAStarPath(
 	static char c;
 	smallerPQIndex = 0;
 
-	closed_nodes_map.resize(Height);
-	open_nodes_map.resize(Height);
+	closed_nodes_map.resize(height);
+	open_nodes_map.resize(height);
+	all_possible_directions.resize(height);
 
-	for (int i=0; i < Height; i++)
+	for (int i = 0; i < height; i++)
 	{
-		(closed_nodes_map.at(i)).resize(Width);
-		(open_nodes_map.at(i)).resize(Width);
+		(closed_nodes_map.at(i)).resize(width);
+		(open_nodes_map.at(i)).resize(width);
+		(all_possible_directions.at(i)).resize(width);
 	}
 
 	// Initialize the cells in the maps
-	for (rowIndex = 0; rowIndex < Height; rowIndex++)
+	for (rowIndex = 0; rowIndex < height; rowIndex++)
 	{
-		for (colIndex = 0; colIndex < Width; colIndex++)
+		for (colIndex = 0; colIndex < width; colIndex++)
 		{
 			(closed_nodes_map.at(rowIndex)).at(colIndex) = 0;
 			(open_nodes_map.at(rowIndex)).at(colIndex) = 0;
@@ -51,9 +60,9 @@ string PathPlanner::FindAStarPath(
 	}
 
 	// Create the start node and push into list of open nodes
-	Location startLocation = { .x = nRowStart, .y = nColStart };
+	Location startLocation = { .x = startRow, .y = startCol };
 	nNodeA = new Node(startLocation, 0, 0);
-	nNodeA->UpdatePriority(nRowFinish, nColFinish);
+	nNodeA->UpdatePriority(goalRow, goalCol);
 	(openNodesQueues[smallerPQIndex]).push(*nNodeA);
 
 	// mark it on the open nodes map
@@ -66,8 +75,7 @@ string PathPlanner::FindAStarPath(
 	{
 		// Get the current node with the highest priority from the list of open nodes
 		Node highestPriorityNode = (openNodesQueues[smallerPQIndex]).top();
-		nNodeA = new Node(
-				highestPriorityNode.GetLocation(),
+		nNodeA = new Node(highestPriorityNode.GetLocation(),
 				highestPriorityNode.GetLevel(),
 				highestPriorityNode.GetPriority());
 
@@ -83,14 +91,14 @@ string PathPlanner::FindAStarPath(
 
 		// Quit searching when the goal state is reached
 		//if((*nodeA).estimate(xFinish, yFinish) == 0)
-		if (rowIndex == nRowFinish && colIndex == nColFinish)
+		if (rowIndex == goalRow && colIndex == goalCol)
 		{
 			// Generate the path from finish to start by following the directions
 			string path = "";
 
-			while (rowIndex != nRowStart || colIndex != nColStart)
+			while (rowIndex != startRow || colIndex != startCol)
 			{
-				cellIndex = dir_map[rowIndex][colIndex];
+				cellIndex = (all_possible_directions.at(rowIndex)).at(colIndex);
 				c = '0' + (cellIndex + dirNum / 2) % dirNum;
 				path = c + path;
 				rowIndex += dirX[cellIndex];
@@ -111,26 +119,32 @@ string PathPlanner::FindAStarPath(
 		// Generate all possible moves
 		for (dirIndex = 0; dirIndex < dirNum; dirIndex++)
 		{
-			Location location = {.x = rowIndex + dirX[dirIndex], .y = colIndex + dirY[dirIndex]};
+			Location location = { .x = rowIndex + dirX[dirIndex], .y = colIndex + dirY[dirIndex] };
 
-			if (location.x >= 0 && location.x <= Height - 1 &&
-				location.y >= 0 && location.y <= Width - 1 &&
-				gridMap[location.x][location.y] != 1 &&
-				(closed_nodes_map.at(location.x)).at(location.y) != 1)
+			bool isLocationInBounds =
+					location.x >= 0 && location.x <= height - 1
+					&& location.y >= 0 && location.y <= width - 1;
+			bool isCellNotOccupied = (occupationMap.at(location.x)).at(location.y) != 1;
+			bool isNodeNotClosed = (closed_nodes_map.at(location.x)).at(location.y) != 1;
+
+			if (isLocationInBounds && isCellNotOccupied && isNodeNotClosed)
 			{
 				// Generate a child node
 				nNodeB = new Node(location, nNodeA->GetLevel(), nNodeA->GetPriority());
 				nNodeB->NextLevel(dirIndex);
-				nNodeB->UpdatePriority(nRowFinish, nColFinish);
+				nNodeB->UpdatePriority(goalRow, goalCol);
 
 				// If the node isn't in the open list - add it
-				if ((open_nodes_map.at(location.x)).at(location.y) == 0)
+				bool isNodeNotOpened = (open_nodes_map.at(location.x)).at(location.y) == 0;
+
+				if (isNodeNotOpened)
 				{
 					(open_nodes_map.at(location.x)).at(location.y) = nNodeB->GetPriority();
 					(openNodesQueues[smallerPQIndex]).push(*nNodeB);
 
 					// mark its parent node direction
-					dir_map[location.x][location.y] = (dirIndex + dirNum / 2) % dirNum;
+					(all_possible_directions.at(location.x)).at(location.y) =
+							(dirIndex + dirNum / 2) % dirNum;
 				}
 				else if ((open_nodes_map.at(location.x)).at(location.y) > nNodeB->GetPriority())
 				{
@@ -138,13 +152,14 @@ string PathPlanner::FindAStarPath(
 					(open_nodes_map.at(location.x)).at(location.y) = nNodeB->GetPriority();
 
 					// Update the parent direction info
-					dir_map[location.x][location.y] = (dirIndex + dirNum / 2) % dirNum;
+					(all_possible_directions.at(location.x)).at(location.y) =
+							(dirIndex + dirNum / 2) % dirNum;
 
 					/* Replace the node by emptying one priority queue to the other one
 					 * except the node to be replaced (will be ignored) and the new node
 					 * (will be pushed in instead)*/
-					while ((((Node)(openNodesQueues[smallerPQIndex].top())).GetLocation().x != location.x) ||
-						   (((Node)(openNodesQueues[smallerPQIndex].top())).GetLocation().y != location.y))
+					while ((((Node) (openNodesQueues[smallerPQIndex].top())).GetLocation().x != location.x) ||
+							(((Node) (openNodesQueues[smallerPQIndex].top())).GetLocation().y != location.y))
 					{
 						Node topNode = (openNodesQueues[smallerPQIndex]).top();
 						(openNodesQueues[1 - smallerPQIndex]).push(topNode);
@@ -155,8 +170,10 @@ string PathPlanner::FindAStarPath(
 					(openNodesQueues[smallerPQIndex]).pop();
 
 					// Empty the larger size priority queue to the smaller one
-					int firstQueueSize = (openNodesQueues[smallerPQIndex]).size();
-					int secondQueueSize = (openNodesQueues[1 - smallerPQIndex]).size();
+					int firstQueueSize =
+							(openNodesQueues[smallerPQIndex]).size();
+					int secondQueueSize =
+							(openNodesQueues[1 - smallerPQIndex]).size();
 
 					if (firstQueueSize > secondQueueSize)
 					{
@@ -189,7 +206,7 @@ string PathPlanner::FindAStarPath(
 	return "";
 }
 
-void PathPlanner::PrintPath(Grid grid, string route)
+void PathPlanner::InitMapWithRoute()
 {
 	Location start = grid.GetGridStartLocation();
 
@@ -214,11 +231,8 @@ void PathPlanner::PrintPath(Grid grid, string route)
 		}
 	}
 
-	vector<unsigned char> pixels;
-	pixels.resize(height * width * 4);
-
 	// Follow the route on the map
-	if (route.length() <= 0)
+	if (plannedRoute.length() <= 0)
 	{
 		cout << "No route found";
 		cout << endl;
@@ -226,88 +240,100 @@ void PathPlanner::PrintPath(Grid grid, string route)
 	else
 	{
 		int direction;
-		char c;
+		char directionCharacter;
 		unsigned int x = start.y;
 		unsigned int y = start.x;
 		(copiedGrid.at(x)).at(y) = START;
 
-		for (unsigned int i = 0; i < route.length(); i++)
+		for (unsigned int i = 0; i < plannedRoute.length(); i++)
 		{
-			c = route.at(i);
-			direction = c - '0';
+			directionCharacter = plannedRoute.at(i);
+			direction = directionCharacter - '0';
 			x += dirX[direction];
 			y += dirY[direction];
 			(copiedGrid.at(x)).at(y) = ROUTE;
 		}
 
 		(copiedGrid.at(x)).at(y) = FINISH;
-		int cells = 0;
 
-		// display the map with the route
-		for (int x = 0; x < height; x++)
+		routeCvMat = cv::Mat(height, width, CV_8UC3, cv::Scalar::all(0));
+
+		// Initialize the map with the route
+		for (int i = 0; i < height; i++)
 		{
-			for (int y = 0; y < width; y++)
+			for (int j = 0; j < width; j++)
 			{
-				if ((copiedGrid.at(x)).at(y) == 0)
-					cout << ".";
-				else if ((copiedGrid.at(x)).at(y) == 1)
-					cout << "O"; //obstacle
-				else if ((copiedGrid.at(x)).at(y) == 2)
-					cout << "S"; //start
-				else if ((copiedGrid.at(x)).at(y) == 3)
-					cout << "R"; //route
-				else if ((copiedGrid.at(x)).at(y) == 4)
-					cout << "F"; //finish
-
-				switch ((copiedGrid.at(x)).at(y))
-				{
-					case (OBSTACLE): {
-						pixels[cells] = 0;
-						pixels[cells + 1] = 0;
-						pixels[cells + 2] = 0;
-						pixels[cells + 3] = 255;
-						break;
-					}
-					case (START): {
-						pixels[cells] = 0;
-						pixels[cells + 1] = 0;
-						pixels[cells + 2] = 255;
-						pixels[cells + 3] = 255;
-						break;
-					}
-					case (ROUTE): {
-						pixels[cells] = 0;
-						pixels[cells + 1] = 255;
-						pixels[cells + 2] = 0;
-						pixels[cells + 3] = 255;
-						break;
-					}
-					case (FINISH): {
-						pixels[cells] = 255;
-						pixels[cells + 1] = 0;
-						pixels[cells + 2] = 0;
-						pixels[cells + 3] = 255;
-						break;
-					}
-					default: {
-						pixels[cells] = 255;
-						pixels[cells + 1] = 255;
-						pixels[cells + 2] = 255;
-						pixels[cells + 3] = 255;
-						break;
-					}
-				}
-
-				cells += 4;
+				int currentCellValue = (copiedGrid.at(i)).at(j);
+				ColorPixelByCellValue(currentCellValue, i, j);
 			}
-
-			cout << endl;
 		}
-
-		//lodepng::encode("RouteToFinish.png", pixels, width, height);
 	}
 }
 
-PathPlanner::~PathPlanner() {
+void PathPlanner::ColorPixelByCellValue(int currentCellValue, int i, int j)
+{
+	switch(currentCellValue)
+	{
+		case(0):
+		{
+			// Color in white
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 255;
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 255;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 255;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 255;
+			break;
+		}
+		case(1):	// obstacle
+		{
+			// Color in black
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 0;
+			break;
+		}
+		case(2):	// start
+		{
+			// Color in blue
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 255;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 0;
+			break;
+		}
+		case(3):	// route
+		{
+			// Color in red
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 255;
+			break;
+		}
+		case(4):	// finish
+		{
+			// Color in green
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 255;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 0;
+			break;
+		}
+		default:	// unknown
+		{
+			// Color in gray
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 128;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 128;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 128;
+			break;
+		}
+	}
+}
+
+void PathPlanner::PrintRouteCvMat()
+{
+	cv::namedWindow("OccupancyGrid-view-route");
+	cv::imshow("OccupancyGrid-view-route", routeCvMat);
+	cv::waitKey(1);
+}
+
+PathPlanner::~PathPlanner()
+{
 	// TODO Auto-generated destructor stub
 }
