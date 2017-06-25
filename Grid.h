@@ -23,12 +23,12 @@ private:
 public:
 	Grid();
 	Grid(vector< vector<bool> > grid, double mapResolution, double height, double width, Location start, Location goal);
-	int GetGridHeight();
-	int GetGridWidth();
-	vector< vector<bool> > GetGrid();
-	double GetMapResolution();
-	Location GetGridStartLocation();
-	Location GetGridGoalLocation();
+	int GetGridHeight() const;
+	int GetGridWidth() const;
+	vector< vector<bool> > GetOccupationMap() const;
+	double GetMapResolution() const;
+	Location GetGridStartLocation() const;
+	Location GetGridGoalLocation() const;
 	virtual ~Grid();
 };
 

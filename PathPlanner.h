@@ -45,7 +45,7 @@ private:
 	void ColorPixelByCellValue(int currentCellValue, int i, int j);
 
 public:
-	PathPlanner(Grid * grid);
+	PathPlanner(const Grid * grid);
 	string FindAStarPath();
 	void PrintRouteCvMat();
 	virtual ~PathPlanner();

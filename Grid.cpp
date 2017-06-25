@@ -17,27 +17,27 @@ Grid::Grid(vector< vector<bool> > grid, double mapResolution,
 	this->goalLocation = goal;
 }
 
-int Grid::GetGridHeight(){
+int Grid::GetGridHeight() const {
 	return gridHeight;
 }
 
-int Grid::GetGridWidth(){
+int Grid::GetGridWidth() const {
 	return gridWidth;
 }
 
-vector< vector<bool> > Grid::GetGrid(){
+vector< vector<bool> > Grid::GetOccupationMap() const {
 	return grid;
 }
 
-double Grid::GetMapResolution(){
+double Grid::GetMapResolution() const {
 	return mapResolution;
 }
 
-Location Grid::GetGridStartLocation(){
+Location Grid::GetGridStartLocation() const {
 	return startLocation;
 }
 
-Location Grid::GetGridGoalLocation(){
+Location Grid::GetGridGoalLocation() const {
 	return goalLocation;
 }
 

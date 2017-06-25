@@ -11,17 +11,17 @@ using namespace HamsterAPI;
 #define ROUTE 3
 #define FINISH 4
 
-PathPlanner::PathPlanner(Grid * grid)
+PathPlanner::PathPlanner(const Grid * grid)
 {
 	this->startRow=grid->GetGridStartLocation().y;
 	this->startCol=grid->GetGridStartLocation().x;
 	this->goalRow=grid->GetGridGoalLocation().y;
 	this->goalCol=grid->GetGridGoalLocation().x;
-	this->occupationMap=grid->GetGrid();
+	this->occupationMap=grid->GetOccupationMap();
 	this->height=grid->GetGridHeight();
 	this->width=grid->GetGridWidth();
 
-	plannedRoute = FindAStarPath();
+	this->plannedRoute = FindAStarPath();
 	InitMapWithRoute();
 }
 
@@ -208,13 +208,8 @@ string PathPlanner::FindAStarPath()
 
 void PathPlanner::InitMapWithRoute()
 {
-	Location start = grid.GetGridStartLocation();
-
-	vector<vector<bool> > gridMap = grid.GetGrid();
+	Location start = { .x = startCol, .y = startRow };
 	vector<vector<int> > copiedGrid;
-
-	double height = grid.GetGridHeight();
-	double width = grid.GetGridWidth();
 
 	copiedGrid.resize(height);
 
@@ -227,7 +222,7 @@ void PathPlanner::InitMapWithRoute()
 	{
 		for (int j = 0; j < width; j++)
 		{
-			(copiedGrid.at(i)).at(j) = (gridMap.at(i)).at(j);
+			(copiedGrid.at(i)).at(j) = (occupationMap.at(i)).at(j);
 		}
 	}
 
