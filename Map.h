@@ -23,12 +23,14 @@ private:
 	void InitInflatedCvMat();
 	vector< vector<bool> > GetInflatedOccupationMap();
 	bool DoesCellHaveOccupiedNeighbor(int rowIndex, int colIndex);
+
 public:
 	vector< vector<bool> > occupationMap;
 	Grid grid;
 	Map();
 	Map(HamsterAPI::OccupancyGrid * map, int robotSizeInCm, Location startLocation, Location goalLocation);
 	void PrintInflatedCvMat();
+	virtual ~Map();
 };
 
 #endif /* MAP_H_ */

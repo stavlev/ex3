@@ -43,7 +43,7 @@ int main()
 						grid.GetGridHeight(),
 						grid.GetGridWidth());
 
-				//pathPlanner.PrintPath(grid, route);
+				pathPlanner.PrintPath(grid, route);
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{

@@ -28,7 +28,7 @@ Map::Map(HamsterAPI::OccupancyGrid * map, int robotSizeInCm,
 
 	for (int i=0; i < mapHeight; i++)
 	{
-		occupationMap[i].resize(mapWidth);
+		(occupationMap.at(i)).resize(mapWidth);
 	}
 
 	InitCvMatFromMap();
@@ -80,7 +80,7 @@ void Map::InitCvMatFromMap()
 			}
 
 			originalCvMat.at<unsigned char>(i, j) = pixelColor;
-			occupationMap[i][j] = isCurrentCellOccupied;
+			(occupationMap.at(i)).at(j) = isCurrentCellOccupied;
 		}
 	}
 }
@@ -95,7 +95,7 @@ vector< vector<bool> > Map::GetInflatedOccupationMap()
 
 	for (int i=0; i < mapHeight; i++)
 	{
-		inflatedOccupationMap[i].resize(mapWidth);
+		(inflatedOccupationMap.at(i)).resize(mapWidth);
 	}
 
 	// Iterate through the center of the copy matrix and check for each cell if it is
@@ -114,7 +114,7 @@ vector< vector<bool> > Map::GetInflatedOccupationMap()
 				inflatedCvMat.at<unsigned char>(i, j) = BLACK_COLOR;
 			}
 
-			inflatedOccupationMap[i][j] = shouldInflateCurrCell;
+			(inflatedOccupationMap.at(i)).at(j) = shouldInflateCurrCell;
 		}
 	}
 
@@ -174,4 +174,8 @@ void Map::PrintInflatedCvMat()
 	cv::namedWindow("OccupancyGrid-view-inflated");
 	cv::imshow("OccupancyGrid-view-inflated", inflatedCvMat);
 	cv::waitKey(1);
+}
+
+Map::~Map() {
+	// TODO Auto-generated destructor stub
 }

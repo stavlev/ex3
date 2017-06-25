@@ -2,7 +2,6 @@
 #include "Map.h"
 #include <iostream>
 #include <math.h>
-#include <queue>
 #include <HamsterAPIClientCPP/Hamster.h>
 using namespace std;
 using namespace HamsterAPI;
@@ -12,94 +11,18 @@ using namespace HamsterAPI;
 #define ROUTE 3
 #define FINISH 4
 
-class Node
-{
-private:
-	Location currLocation;
-	int level;		// Total distance already traveled to reach the node
-	int priority;	// priority=level+remaining distance estimate
-
-public:
-	Node(){
-		Location location = {.x = 0, .y = 0};
-		this->currLocation = location;
-		this->level = 0;
-		this->priority = 0;
-	}
-
-	Node(Location currLocation, int level, int priority)
-	{
-		this->currLocation = currLocation;
-		this->level = level;
-		this->priority = priority;
-	}
-
-	Location GetLocation() const
-	{
-		return currLocation;
-	}
-
-	int GetLevel() const
-	{
-		return level;
-	}
-
-	int GetPriority() const
-	{
-		return priority;
-	}
-
-	void UpdatePriority(const int & xDest, const int & yDest)
-	{
-		priority = level + GetHeuristicEstimate(xDest, yDest) * 10; //A*
-	}
-
-	// Give better priority to going straight instead of diagonally
-	void NextLevel(const int & direction)
-	{
-		if (direction % 2 == 0)
-		{
-			level += 10;
-		}
-		else
-		{
-			level += 14;
-		}
-	}
-
-	// Heuristic estimation function for the remaining distance to the goal
-	const int & GetHeuristicEstimate(const int & xDest, const int & yDest) const
-	{
-		static int xd, yd, distance;
-		xd = xDest - currLocation.x;
-		yd = yDest - currLocation.y;
-
-		distance = static_cast<int>(sqrt(xd * xd + yd * yd));
-
-		return (distance);
-	}
-};
-
-struct NodePriorityComparer {
-    bool operator()(const Node& nodeA, const Node& nodeB)
-    {
-    	return nodeA.GetPriority() > nodeB.GetPriority();
-    }
-};
-
 string PathPlanner::FindAStarPath(
 		const int nRowStart, const int nColStart,
 		const int nRowFinish, const int nColFinish,
-		vector<vector<bool> > GridMap,
+		vector<vector<bool> > gridMap,
 		const int Height, const int Width)
 {
-	int closed_nodes_map[Height][Width];	// map of closed (tried-out) nodes
-	int open_nodes_map[Height][Width];		// map of open (not-yet-tried) nodes
+	vector<vector <int> > closed_nodes_map;	// map of closed (tried-out) nodes
+	vector<vector <int> > open_nodes_map;	// map of open (not-yet-tried) nodes
+	//int closed_nodes_map[Height][Width];	// map of closed (tried-out) nodes
+	//int open_nodes_map[Height][Width];		// map of open (not-yet-tried) nodes
 
 	int dir_map[Height][Width];
-
-	// list of open (not-yet-tried) nodes
-	static priority_queue<Node, std::vector<Node>, NodePriorityComparer> priorityQueues[2];
 
 	static int smallerPQIndex;
 	static Node* nNodeA;
@@ -108,13 +31,22 @@ string PathPlanner::FindAStarPath(
 	static char c;
 	smallerPQIndex = 0;
 
+	closed_nodes_map.resize(Height);
+	open_nodes_map.resize(Height);
+
+	for (int i=0; i < Height; i++)
+	{
+		(closed_nodes_map.at(i)).resize(Width);
+		(open_nodes_map.at(i)).resize(Width);
+	}
+
 	// Initialize the cells in the maps
 	for (rowIndex = 0; rowIndex < Height; rowIndex++)
 	{
 		for (colIndex = 0; colIndex < Width; colIndex++)
 		{
-			closed_nodes_map[rowIndex][colIndex] = 0;
-			open_nodes_map[rowIndex][colIndex] = 0;
+			(closed_nodes_map.at(rowIndex)).at(colIndex) = 0;
+			(open_nodes_map.at(rowIndex)).at(colIndex) = 0;
 		}
 	}
 
@@ -122,16 +54,18 @@ string PathPlanner::FindAStarPath(
 	Location startLocation = { .x = nRowStart, .y = nColStart };
 	nNodeA = new Node(startLocation, 0, 0);
 	nNodeA->UpdatePriority(nRowFinish, nColFinish);
-	(priorityQueues[smallerPQIndex]).push(*nNodeA);
+	(openNodesQueues[smallerPQIndex]).push(*nNodeA);
 
 	// mark it on the open nodes map
-	open_nodes_map[rowIndex][colIndex] = nNodeA->GetPriority();
+	rowIndex = nNodeA->GetLocation().x;
+	colIndex = nNodeA->GetLocation().y;
+	(open_nodes_map.at(rowIndex)).at(colIndex) = nNodeA->GetPriority();
 
 	// A* search
-	while (!(priorityQueues[smallerPQIndex]).empty())
+	while (!(openNodesQueues[smallerPQIndex]).empty())
 	{
 		// Get the current node with the highest priority from the list of open nodes
-		Node highestPriorityNode = (priorityQueues[smallerPQIndex]).top();
+		Node highestPriorityNode = (openNodesQueues[smallerPQIndex]).top();
 		nNodeA = new Node(
 				highestPriorityNode.GetLocation(),
 				highestPriorityNode.GetLevel(),
@@ -141,11 +75,11 @@ string PathPlanner::FindAStarPath(
 		colIndex = nNodeA->GetLocation().y;
 
 		// Remove the node from the open list
-		(priorityQueues[smallerPQIndex]).pop();
-		open_nodes_map[rowIndex][colIndex] = 0;
+		(openNodesQueues[smallerPQIndex]).pop();
+		(open_nodes_map.at(rowIndex)).at(colIndex) = 0;
 
 		// Mark it on the closed nodes map
-		closed_nodes_map[rowIndex][colIndex] = 1;
+		(closed_nodes_map.at(rowIndex)).at(colIndex) = 1;
 
 		// Quit searching when the goal state is reached
 		//if((*nodeA).estimate(xFinish, yFinish) == 0)
@@ -166,9 +100,9 @@ string PathPlanner::FindAStarPath(
 			// Delete node and all left nodes
 			delete nNodeA;
 
-			while (!(priorityQueues[smallerPQIndex]).empty())
+			while (!(openNodesQueues[smallerPQIndex]).empty())
 			{
-				(priorityQueues[smallerPQIndex]).pop();
+				(openNodesQueues[smallerPQIndex]).pop();
 			}
 
 			return path;
@@ -181,8 +115,8 @@ string PathPlanner::FindAStarPath(
 
 			if (location.x >= 0 && location.x <= Height - 1 &&
 				location.y >= 0 && location.y <= Width - 1 &&
-				GridMap[location.x][location.y] != 1 &&
-				closed_nodes_map[location.x][location.y] != 1)
+				gridMap[location.x][location.y] != 1 &&
+				(closed_nodes_map.at(location.x)).at(location.y) != 1)
 			{
 				// Generate a child node
 				nNodeB = new Node(location, nNodeA->GetLevel(), nNodeA->GetPriority());
@@ -190,18 +124,18 @@ string PathPlanner::FindAStarPath(
 				nNodeB->UpdatePriority(nRowFinish, nColFinish);
 
 				// If the node isn't in the open list - add it
-				if (open_nodes_map[location.x][location.y] == 0)
+				if ((open_nodes_map.at(location.x)).at(location.y) == 0)
 				{
-					open_nodes_map[location.x][location.y] = nNodeB->GetPriority();
-					(priorityQueues[smallerPQIndex]).push(*nNodeB);
+					(open_nodes_map.at(location.x)).at(location.y) = nNodeB->GetPriority();
+					(openNodesQueues[smallerPQIndex]).push(*nNodeB);
 
 					// mark its parent node direction
 					dir_map[location.x][location.y] = (dirIndex + dirNum / 2) % dirNum;
 				}
-				else if (open_nodes_map[location.x][location.y] > nNodeB->GetPriority())
+				else if ((open_nodes_map.at(location.x)).at(location.y) > nNodeB->GetPriority())
 				{
 					// Update the priority info
-					open_nodes_map[location.x][location.y] = nNodeB->GetPriority();
+					(open_nodes_map.at(location.x)).at(location.y) = nNodeB->GetPriority();
 
 					// Update the parent direction info
 					dir_map[location.x][location.y] = (dirIndex + dirNum / 2) % dirNum;
@@ -209,37 +143,37 @@ string PathPlanner::FindAStarPath(
 					/* Replace the node by emptying one priority queue to the other one
 					 * except the node to be replaced (will be ignored) and the new node
 					 * (will be pushed in instead)*/
-					while ((((Node)(priorityQueues[smallerPQIndex].top())).GetLocation().x != location.x) ||
-						   (((Node)(priorityQueues[smallerPQIndex].top())).GetLocation().y != location.y))
+					while ((((Node)(openNodesQueues[smallerPQIndex].top())).GetLocation().x != location.x) ||
+						   (((Node)(openNodesQueues[smallerPQIndex].top())).GetLocation().y != location.y))
 					{
-						Node topNode = (priorityQueues[smallerPQIndex]).top();
-						(priorityQueues[1 - smallerPQIndex]).push(topNode);
-						(priorityQueues[smallerPQIndex]).pop();
+						Node topNode = (openNodesQueues[smallerPQIndex]).top();
+						(openNodesQueues[1 - smallerPQIndex]).push(topNode);
+						(openNodesQueues[smallerPQIndex]).pop();
 					}
 
 					// Remove the wanted node
-					(priorityQueues[smallerPQIndex]).pop();
+					(openNodesQueues[smallerPQIndex]).pop();
 
 					// Empty the larger size priority queue to the smaller one
-					int firstQueueSize = (priorityQueues[smallerPQIndex]).size();
-					int secondQueueSize = (priorityQueues[1 - smallerPQIndex]).size();
+					int firstQueueSize = (openNodesQueues[smallerPQIndex]).size();
+					int secondQueueSize = (openNodesQueues[1 - smallerPQIndex]).size();
 
 					if (firstQueueSize > secondQueueSize)
 					{
 						smallerPQIndex = 1 - smallerPQIndex;
 					}
 
-					while (!priorityQueues[smallerPQIndex].empty())
+					while (!openNodesQueues[smallerPQIndex].empty())
 					{
-						Node nodeToPush = priorityQueues[smallerPQIndex].top();
-						(priorityQueues[1 - smallerPQIndex]).push(nodeToPush);
-						(priorityQueues[smallerPQIndex]).pop();
+						Node nodeToPush = openNodesQueues[smallerPQIndex].top();
+						(openNodesQueues[1 - smallerPQIndex]).push(nodeToPush);
+						(openNodesQueues[smallerPQIndex]).pop();
 					}
 
 					smallerPQIndex = 1 - smallerPQIndex;
 
 					// Insert the better node instead
-					(priorityQueues[smallerPQIndex]).push(*nNodeB);
+					(openNodesQueues[smallerPQIndex]).push(*nNodeB);
 				}
 				else
 				{
@@ -269,14 +203,14 @@ void PathPlanner::PrintPath(Grid grid, string route)
 
 	for (int i = 0; i < height; i++)
 	{
-		copiedGrid[i].resize(width);
+		copiedGrid.at(i).resize(width);
 	}
 
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
 		{
-			copiedGrid[i][j] = gridMap[i][j];
+			(copiedGrid.at(i)).at(j) = (gridMap.at(i)).at(j);
 		}
 	}
 
@@ -295,7 +229,7 @@ void PathPlanner::PrintPath(Grid grid, string route)
 		char c;
 		unsigned int x = start.y;
 		unsigned int y = start.x;
-		copiedGrid[x][y] = START;
+		(copiedGrid.at(x)).at(y) = START;
 
 		for (unsigned int i = 0; i < route.length(); i++)
 		{
@@ -303,10 +237,10 @@ void PathPlanner::PrintPath(Grid grid, string route)
 			direction = c - '0';
 			x += dirX[direction];
 			y += dirY[direction];
-			copiedGrid[x][y] = ROUTE;
+			(copiedGrid.at(x)).at(y) = ROUTE;
 		}
 
-		copiedGrid[x][y] = FINISH;
+		(copiedGrid.at(x)).at(y) = FINISH;
 		int cells = 0;
 
 		// display the map with the route
@@ -314,18 +248,18 @@ void PathPlanner::PrintPath(Grid grid, string route)
 		{
 			for (int y = 0; y < width; y++)
 			{
-				if (copiedGrid[x][y] == 0)
+				if ((copiedGrid.at(x)).at(y) == 0)
 					cout << ".";
-				else if (copiedGrid[x][y] == 1)
+				else if ((copiedGrid.at(x)).at(y) == 1)
 					cout << "O"; //obstacle
-				else if (copiedGrid[x][y] == 2)
+				else if ((copiedGrid.at(x)).at(y) == 2)
 					cout << "S"; //start
-				else if (copiedGrid[x][y] == 3)
+				else if ((copiedGrid.at(x)).at(y) == 3)
 					cout << "R"; //route
-				else if (copiedGrid[x][y] == 4)
+				else if ((copiedGrid.at(x)).at(y) == 4)
 					cout << "F"; //finish
 
-				switch (copiedGrid[x][y])
+				switch ((copiedGrid.at(x)).at(y))
 				{
 					case (OBSTACLE): {
 						pixels[cells] = 0;
@@ -372,4 +306,8 @@ void PathPlanner::PrintPath(Grid grid, string route)
 
 		//lodepng::encode("RouteToFinish.png", pixels, width, height);
 	}
+}
+
+PathPlanner::~PathPlanner() {
+	// TODO Auto-generated destructor stub
 }
