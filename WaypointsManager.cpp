@@ -33,9 +33,10 @@ int WayPointsManager::CreateWaypoints(string plannedRoute, Location startLocatio
 			directionCharacter = plannedRoute.at(i);
 			currDirectionIndex = numericCharToInt(directionCharacter);
 
-			bool isCurrPointContinuationOfWay = directionsCounter == 0 || (currDirectionIndex  == prevDirectionIndex && directionsCounter < 5);
+			bool isCurrPointContinuationOfWay = currDirectionIndex == prevDirectionIndex/* && directionsCounter <= 4*/;
+			bool isWaypoint = directionsCounter == 0 || isCurrPointContinuationOfWay;
 
-			if (isCurrPointContinuationOfWay)
+			if (isWaypoint)
 			{
 				directionsCounter++;
 			}
