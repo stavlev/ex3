@@ -21,7 +21,7 @@
 #define GOAL 4
 #define WAYPOINT 5
 
-#define NUMBER_OF_PARTICALES 1000
+#define NUMBER_OF_PARTICLES 1000
 
 #define numericCharToInt(numChar) (numChar - '0')
 // Converts degrees to radians

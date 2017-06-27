@@ -17,15 +17,15 @@ using namespace HamsterAPI;
 LocalizationManager::LocalizationManager()
 {
 	srand(time(NULL));
-	Particles.resize(NUMBER_OF_PARTICALES);
+	Particles.resize(NUMBER_OF_PARTICLES);
 }
 
 void LocalizationManager::RandomizeParticles(Location originalLocation)
 {
-	for (int particleNumber = 0; particleNumber < NUMBER_OF_PARTICALES; particleNumber++)
+	for (int particleNumber = 0; particleNumber < NUMBER_OF_PARTICLES; particleNumber++)
 	{
 		Location randomizedLocation = RandomizeLocation(originalLocation);
-		Particles[particleNumber] = Particle(randomizedLocation.x, randomizedLocation.y, randomizedLocation.yaw);
+		Particles.at(particleNumber) = Particle(randomizedLocation.x, randomizedLocation.y, randomizedLocation.yaw);
 	}
 
 	_currentLocation = originalLocation;
@@ -37,9 +37,9 @@ Location LocalizationManager::GetBestLocation(Scan scan, Location originLocation
 	Location maxBeliefLocation;
 	double maxBelief = 0;
 
-	for (int particleIndex =0; particleIndex < NUMBER_OF_PARTICALES; particleIndex++)
+	for (int particleIndex =0; particleIndex < NUMBER_OF_PARTICLES; particleIndex++)
 	{
-		Particle currentParticle = Particles[particleIndex];
+		Particle currentParticle = Particles.at(particleIndex);
 		Location particleLocation = currentParticle.GetLocation();
 		vector <double > particleScan = scan.Particle(particleLocation);
 		double belief = currentParticle.GetBelief(robotScan, particleScan, NUMBER_OF_RAYS);
@@ -56,9 +56,9 @@ Location LocalizationManager::GetBestLocation(Scan scan, Location originLocation
 
 void LocalizationManager::MoveParticles(double deltaDetination)
 {
-	for (int particleIndex = 0; particleIndex < NUMBER_OF_PARTICALES; particleIndex++)
+	for (int particleIndex = 0; particleIndex < NUMBER_OF_PARTICLES; particleIndex++)
 	{
-		Particles[particleIndex].Move(deltaDetination);
+		Particles.at(particleIndex).Move(deltaDetination);
 	}
 }
 
@@ -71,19 +71,19 @@ Location LocalizationManager::RandomizeLocation(Location originalLocation)
 	double randomPositionYaw = 0;
 
 	// 0 - 40 cms x y probability
-	if(randomNamber < 50)
+	if (randomNamber < 50)
 	{
 		randomDeltaX = rand() % 40 - 20;
 		randomDeltaY = rand() % 40 - 20;
 	}
 	// 0 - 60 cms x y probability
-	else if(randomNamber < 75)
+	else if (randomNamber < 75)
 	{
 		randomDeltaX = rand() % 60 - 30;
 		randomDeltaY = rand() % 60 - 30;
 	}
 	// 0 - 70 cms x y probability
-	else if(randomNamber < 90)
+	else if (randomNamber < 90)
 	{
 		randomDeltaX = rand() % 70 - 35;
 		randomDeltaY = rand() % 70 - 35;
@@ -104,53 +104,67 @@ Location LocalizationManager::RandomizeLocation(Location originalLocation)
 	return particleLocation;
 }
 
-vector<unsigned char> LocalizationManager::PrintParticlesOnPixels(
-		vector<unsigned char> picture, int width, int height, double resolutionInCM, Location current, Location chosen)
+vector<vector<int> > LocalizationManager::PrintParticlesOnPixels(
+		vector<vector<int> > mapFromPlannedRoute, int width, int height, double resolutionInCM, Location current, Location chosen)
 {
-	vector<unsigned char> pictureCopy;
-	int pictureSize = picture.size();
-	pictureCopy.resize(pictureSize);
+	vector<vector<int> > mapCopy;
 
-	for (int pixelColor =0 ; pixelColor < pictureSize; pixelColor++)
+	mapCopy.resize(height);
+
+	for (int i = 0; i < height; i++)
 	{
-		pictureCopy[pixelColor] = picture[pixelColor];
+		mapCopy.at(i).resize(width);
 	}
 
-	for (int particleNumber = 0; particleNumber < NUMBER_OF_PARTICALES; particleNumber++)
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			(mapCopy.at(i)).at(j) = (mapFromPlannedRoute.at(i)).at(j);
+		}
+	}
+
+	for (int particleNumber = 0; particleNumber < NUMBER_OF_PARTICLES; particleNumber++)
 	{
 		Particle currentParticle = Particles[particleNumber];
+
 		double currentX = ((currentParticle.GetPosX() * 100) / resolutionInCM) + (double)width/2;
 		double currentY = height -(-(-(currentParticle.GetPosY() * 100) / resolutionInCM) + (double)height/2);
-		int yoffset = width * 4 * round(currentY);
-		int xoffset = round(currentX) * 4;
-		int offset = yoffset + xoffset;
-		pictureCopy[offset] = 255;
-		pictureCopy[offset + 1] = 0;
-		pictureCopy[offset + 2] = 0;
-		pictureCopy[offset + 3] = 255;
+
+		(mapCopy.at(currentY)).at(currentX) = ROUTE;
+
+		/*int offset = yoffset + xoffset;
+
+		// R = 255, G = 0, B = 0
+		mapCopy[offset] = 255;
+		mapCopy[offset + 1] = 0;
+		mapCopy[offset + 2] = 0;
+		mapCopy[offset + 3] = 255;*/
 	}
 
 	double currentX = ((current.x * 100) / resolutionInCM) + (double)width/2;
 	double currentY = height -(-(-(current.y * 100) / resolutionInCM) + (double)height/2);
-	int yoffset = width * 4 * round(currentY);
-	int xoffset = round(currentX) * 4;
-	int offset = yoffset + xoffset;
-	pictureCopy[offset] = 0;
-	pictureCopy[offset + 1] = 0;
-	pictureCopy[offset + 2] = 255;
-	pictureCopy[offset + 3] = 255;
+
+	(mapCopy.at(currentY)).at(currentX) = START;
+
+	// R = 0, G = 0, B = 255
+	/*mapCopy[offset] = 0;
+	mapCopy[offset + 1] = 0;
+	mapCopy[offset + 2] = 255;
+	mapCopy[offset + 3] = 255;*/
 
 	currentX = ((chosen.x * 100) / resolutionInCM) + (double)width/2;
 	currentY = height -(-(-(chosen.y * 100) / resolutionInCM) + (double)height/2);
-	yoffset = width * 4 * round(currentY);
-	xoffset = round(currentX) * 4;
-	offset = yoffset + xoffset;
-	pictureCopy[offset] = 0;
-	pictureCopy[offset + 1] = 255;
-	pictureCopy[offset + 2] = 255;
-	pictureCopy[offset + 3] = 255;
 
-	return pictureCopy;
+	(mapCopy.at(currentY)).at(currentX) = GOAL;
+
+	// R = 0, G = 255, B = 255
+	/*mapCopy[offset] = 0;
+	mapCopy[offset + 1] = 255;
+	mapCopy[offset + 2] = 255;
+	mapCopy[offset + 3] = 255;*/
+
+	return mapCopy;
 }
 
 LocalizationManager::~LocalizationManager() {

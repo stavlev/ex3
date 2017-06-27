@@ -26,7 +26,7 @@ public:
 	Location RandomizeLocation(Location originalLocation);
 	Location GetBestLocation(Scan scan, Location originLocation);
 	void MoveParticles(double deltaDetination);
-	vector<unsigned char> PrintParticlesOnPixels(vector<unsigned char> picture, int width, int height, double resolutionInCM, Location current, Location chosen);
+	vector<vector<int> > PrintParticlesOnPixels(vector<vector<int> > mapFromPlannedRoute, int width, int height, double resolutionInCM, Location current, Location chosen);
 	virtual ~LocalizationManager();
 };
 

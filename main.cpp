@@ -13,8 +13,6 @@
 using namespace std;
 using namespace HamsterAPI;
 
-void HandleMovement(int numOfWaypoints, vector<Location> * waypoints, Robot * robot, LocalizationManager * localizationManager, Scan * scan);
-
 int main()
 {
 	try
@@ -58,9 +56,38 @@ int main()
 				//displayManager.PrintRouteCvMat();
 
 				vector<vector<int> > mapFromPlannedRoute = displayManager.mapFromPlannedRoute;
+
+				vector<vector<int> > randomizedMap = localizationManager.PrintParticlesOnPixels(
+					mapFromPlannedRoute, grid.GetGridWidth(), grid.GetGridHeight(), grid.GetMapResolution(), robotLocation, robotLocation);
+
 				Scan scan = Scan(mapFromPlannedRoute, grid.GetGridWidth(), grid.GetGridHeight(), grid.GetMapResolution(), robot.GetLaser());
 
-				HandleMovement(numOfWaypoints, &waypoints, &robot, &localizationManager, &scan);
+				Location prevLocation = { .x = robot.GetXPosition(), .y = robot.GetYPosition() };
+
+				for (int i = 0; i < numOfWaypoints; i++)
+				{
+					robot.MoveTo(waypoints.at(i));
+
+					robot.Read();
+
+					Location currLocation = { .x = robot.GetXPosition(), .y = robot.GetYPosition(), .yaw = robot.GetYaw() };
+
+					double deltaToDestionation = sqrt(pow(prevLocation.x - currLocation.x, 2) +
+													  pow(prevLocation.y - currLocation.y, 2)) ;
+
+					// moving particles by destinationDelta
+					localizationManager.MoveParticles(deltaToDestionation);
+
+					// Get The location that has the highest accuracy on scans
+					Location newLocation = localizationManager.GetBestLocation(scan, currLocation);
+
+					prevLocation.x = currLocation.x;
+					prevLocation.y = currLocation.y;
+
+					// Set new Location
+					robot.SetVirtualLocation(newLocation);
+					localizationManager.RandomizeParticles(currLocation);
+				}
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{
@@ -74,34 +101,4 @@ int main()
 	}
 
 	return 0;
-}
-
-void HandleMovement(int numOfWaypoints, vector<Location> * waypoints, Robot * robot, LocalizationManager * localizationManager, Scan * scan)
-{
-	Location prevLocation = { .x = robot->GetXPosition(), .y = robot->GetYPosition() };
-
-	for (int i = 0; i < numOfWaypoints; i++)
-	{
-		robot->MoveTo(waypoints->at(i));
-
-		robot->Read();
-
-		Location currLocation = { .x = robot->GetXPosition(), .y = robot->GetYPosition(), .yaw = robot->GetYaw() };
-
-		double deltaToDestionation = sqrt(pow(prevLocation.x - currLocation.x, 2) +
-										  pow(prevLocation.y - currLocation.y, 2)) ;
-
-		// moving particles by destinationDelta
-		localizationManager->MoveParticles(deltaToDestionation);
-
-		// Get The location that has the highest accuracy on scans
-		Location newLocation = localizationManager->GetBestLocation(*scan, currLocation);
-
-		prevLocation.x = currLocation.x;
-		prevLocation.y = currLocation.y;
-
-		// Set new Location
-		robot->SetVirtualLocation(newLocation);
-		localizationManager->RandomizeParticles(currLocation);
-	}
 }

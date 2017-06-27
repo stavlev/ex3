@@ -61,8 +61,8 @@ vector<double> Scan::Robot()
 
 vector<double> Scan::Particle(Location location)
 {
-	vector<double > scans2;
-	scans2.resize(NUMBER_OF_RAYS);
+	vector<double > foundScans;
+	foundScans.resize(NUMBER_OF_RAYS);
 
 	double maxRange = 4;
 
@@ -90,10 +90,10 @@ vector<double> Scan::Particle(Location location)
 			}
 		}
 
-		scans2[angleIndex] = foundScan;
+		foundScans.at(angleIndex) = foundScan;
 	}
 
-	return scans2;
+	return foundScans;
 }
 
 bool Scan::HasObstacleIn(Location location)

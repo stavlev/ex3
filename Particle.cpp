@@ -24,8 +24,8 @@ double Particle::GetBelief(vector <double> readings, vector <double> simulatedRe
 
 	for(int readingIndex = 0; readingIndex < readingsNumber; readingIndex++)
 	{
-		double actualReading = readings[readingIndex];
-		double simulatedReading = simulatedReadings[readingIndex];
+		double actualReading = readings.at(readingIndex);
+		double simulatedReading = simulatedReadings.at(readingIndex);
 		double deltaReading = sqrt(pow(actualReading - simulatedReading,2));
 		double readingAccuracy = (actualReading - deltaReading) / actualReading;
 
