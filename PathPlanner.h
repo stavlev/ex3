@@ -8,6 +8,7 @@
 #ifndef PATHPLANNER_H_
 #define PATHPLANNER_H_
 
+#include "Globals.h"
 #include "Grid.h"
 #include "Node.h"
 #include <string>
@@ -22,10 +23,6 @@ struct NodePriorityComparer {
     }
 };
 
-// map of directions
-const int dirNum=8; // number of possible directions to go at any position
-static int dirX[dirNum]={1,	1, 0, -1, -1, -1,  0,  1};
-static int dirY[dirNum]={0,	1, 1,  1,  0, -1, -1, -1};
 // list of open (not-yet-tried) nodes
 static priority_queue<Node, std::vector<Node>, NodePriorityComparer> openNodesQueues[2];
 
@@ -39,14 +36,14 @@ private:
 	vector< vector<bool> > occupationMap;
 	int height;
 	int width;
-	string plannedRoute;
 	cv::Mat_<cv::Vec3b> routeCvMat;
 	void InitMapWithRoute();
 	void ColorPixelByCellValue(int currentCellValue, int i, int j);
 
 public:
+	string plannedRoute;
 	PathPlanner(const Grid * grid);
-	string FindAStarPath();
+	string FindAStarRoute();
 	void PrintRouteCvMat();
 	virtual ~PathPlanner();
 };

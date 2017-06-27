@@ -1,3 +1,4 @@
+#include "Globals.h"
 #include "PathPlanner.h"
 #include "Map.h"
 #include <iostream>
@@ -5,11 +6,6 @@
 #include <HamsterAPIClientCPP/Hamster.h>
 using namespace std;
 using namespace HamsterAPI;
-
-#define OBSTACLE 1
-#define START 2
-#define ROUTE 3
-#define FINISH 4
 
 PathPlanner::PathPlanner(const Grid * grid)
 {
@@ -21,11 +17,10 @@ PathPlanner::PathPlanner(const Grid * grid)
 	this->height=grid->GetGridHeight();
 	this->width=grid->GetGridWidth();
 
-	this->plannedRoute = FindAStarPath();
-	InitMapWithRoute();
+	this->plannedRoute = FindAStarRoute();
 }
 
-string PathPlanner::FindAStarPath()
+string PathPlanner::FindAStarRoute()
 {
 	vector<vector<int> > closed_nodes_map;	// map of closed (tried-out) nodes
 	vector<vector<int> > open_nodes_map;	// map of open (not-yet-tried) nodes
@@ -89,18 +84,19 @@ string PathPlanner::FindAStarPath()
 		// Mark it on the closed nodes map
 		(closed_nodes_map.at(rowIndex)).at(colIndex) = 1;
 
-		// Quit searching when the goal state is reached
-		//if((*nodeA).estimate(xFinish, yFinish) == 0)
-		if (rowIndex == goalRow && colIndex == goalCol)
+		bool isGoalLocationReached = rowIndex == goalRow && colIndex == goalCol;
+
+		if (isGoalLocationReached)
 		{
 			// Generate the path from finish to start by following the directions
-			string path = "";
+			string plannedRoute = "";
 
 			while (rowIndex != startRow || colIndex != startCol)
 			{
 				cellIndex = (all_possible_directions.at(rowIndex)).at(colIndex);
 				c = '0' + (cellIndex + dirNum / 2) % dirNum;
-				path = c + path;
+				plannedRoute = c + plannedRoute;
+
 				rowIndex += dirX[cellIndex];
 				colIndex += dirY[cellIndex];
 			}
@@ -113,7 +109,7 @@ string PathPlanner::FindAStarPath()
 				(openNodesQueues[smallerPQIndex]).pop();
 			}
 
-			return path;
+			return plannedRoute;
 		}
 
 		// Generate all possible moves
@@ -204,128 +200,6 @@ string PathPlanner::FindAStarPath()
 
 	// No route found
 	return "";
-}
-
-void PathPlanner::InitMapWithRoute()
-{
-	Location start = { .x = startCol, .y = startRow };
-	vector<vector<int> > copiedGrid;
-
-	copiedGrid.resize(height);
-
-	for (int i = 0; i < height; i++)
-	{
-		copiedGrid.at(i).resize(width);
-	}
-
-	for (int i = 0; i < height; i++)
-	{
-		for (int j = 0; j < width; j++)
-		{
-			(copiedGrid.at(i)).at(j) = (occupationMap.at(i)).at(j);
-		}
-	}
-
-	// Follow the route on the map
-	if (plannedRoute.length() <= 0)
-	{
-		cout << "No route found";
-		cout << endl;
-	}
-	else
-	{
-		int direction;
-		char directionCharacter;
-		unsigned int x = start.y;
-		unsigned int y = start.x;
-		(copiedGrid.at(x)).at(y) = START;
-
-		for (unsigned int i = 0; i < plannedRoute.length(); i++)
-		{
-			directionCharacter = plannedRoute.at(i);
-			direction = directionCharacter - '0';
-			x += dirX[direction];
-			y += dirY[direction];
-			(copiedGrid.at(x)).at(y) = ROUTE;
-		}
-
-		(copiedGrid.at(x)).at(y) = FINISH;
-
-		routeCvMat = cv::Mat(height, width, CV_8UC3, cv::Scalar::all(0));
-
-		// Initialize the map with the route
-		for (int i = 0; i < height; i++)
-		{
-			for (int j = 0; j < width; j++)
-			{
-				int currentCellValue = (copiedGrid.at(i)).at(j);
-				ColorPixelByCellValue(currentCellValue, i, j);
-			}
-		}
-	}
-}
-
-void PathPlanner::ColorPixelByCellValue(int currentCellValue, int i, int j)
-{
-	switch(currentCellValue)
-	{
-		case(0):
-		{
-			// Color in white
-			routeCvMat.at<cv::Vec3b>(i, j)[0] = 255;
-			routeCvMat.at<cv::Vec3b>(i, j)[0] = 255;
-			routeCvMat.at<cv::Vec3b>(i, j)[1] = 255;
-			routeCvMat.at<cv::Vec3b>(i, j)[2] = 255;
-			break;
-		}
-		case(1):	// obstacle
-		{
-			// Color in black
-			routeCvMat.at<cv::Vec3b>(i, j)[0] = 0;
-			routeCvMat.at<cv::Vec3b>(i, j)[1] = 0;
-			routeCvMat.at<cv::Vec3b>(i, j)[2] = 0;
-			break;
-		}
-		case(2):	// start
-		{
-			// Color in blue
-			routeCvMat.at<cv::Vec3b>(i, j)[0] = 255;
-			routeCvMat.at<cv::Vec3b>(i, j)[1] = 0;
-			routeCvMat.at<cv::Vec3b>(i, j)[2] = 0;
-			break;
-		}
-		case(3):	// route
-		{
-			// Color in red
-			routeCvMat.at<cv::Vec3b>(i, j)[0] = 0;
-			routeCvMat.at<cv::Vec3b>(i, j)[1] = 0;
-			routeCvMat.at<cv::Vec3b>(i, j)[2] = 255;
-			break;
-		}
-		case(4):	// finish
-		{
-			// Color in green
-			routeCvMat.at<cv::Vec3b>(i, j)[0] = 0;
-			routeCvMat.at<cv::Vec3b>(i, j)[1] = 255;
-			routeCvMat.at<cv::Vec3b>(i, j)[2] = 0;
-			break;
-		}
-		default:	// unknown
-		{
-			// Color in gray
-			routeCvMat.at<cv::Vec3b>(i, j)[0] = 128;
-			routeCvMat.at<cv::Vec3b>(i, j)[1] = 128;
-			routeCvMat.at<cv::Vec3b>(i, j)[2] = 128;
-			break;
-		}
-	}
-}
-
-void PathPlanner::PrintRouteCvMat()
-{
-	cv::namedWindow("OccupancyGrid-view-route");
-	cv::imshow("OccupancyGrid-view-route", routeCvMat);
-	cv::waitKey(1);
 }
 
 PathPlanner::~PathPlanner()

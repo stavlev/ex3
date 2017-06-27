@@ -2,16 +2,12 @@
 #include <HamsterAPIClientCPP/Hamster.h>
 #include <iostream>
 #include "stdlib.h"
+#include "Globals.h"
 #include "PathPlanner.h"
+#include "WaypointsManager.h"
+#include "DisplayManager.h"
 using namespace std;
 using namespace HamsterAPI;
-
-#define ROBOT_SIZE_IN_CM 20
-#define X_START 430
-#define Y_START 480
-#define YAW_START 15
-#define X_GOAL 460
-#define Y_GOAL 370
 
 int main()
 {
@@ -34,7 +30,15 @@ int main()
 				Grid grid = map.grid;
 
 				PathPlanner pathPlanner = PathPlanner(&grid);
-				pathPlanner.PrintRouteCvMat();
+				string plannedRoute = pathPlanner.plannedRoute;
+
+				WayPointsManager waypointsManager;
+
+				int numOfWaypoints = waypointsManager.CreateWaypoints(plannedRoute, startLocation, goalLocation);
+				vector<Location> waypoints = waypointsManager.waypoints;
+
+				DisplayManager displayManager = DisplayManager(&grid, plannedRoute, &waypoints);
+				displayManager.PrintRouteCvMat();
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{

@@ -1,15 +1,10 @@
 #ifndef GRID_H_
 #define GRID_H_
 
+#include "Globals.h"
 #include <vector>
 
 using namespace std;
-
-struct Location {
-	int x;
-	int y;
-	int yaw;
-};
 
 class Grid {
 private:
