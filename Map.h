@@ -29,7 +29,6 @@ public:
 	Grid grid;
 	Map();
 	Map(HamsterAPI::OccupancyGrid * map, int robotSizeInCm, Location startLocation, Location goalLocation);
-	void PrintInflatedCvMat();
 	virtual ~Map();
 };
 

@@ -26,6 +26,7 @@ public:
 	vector< vector<bool> > occupationMap;
 	int height;
 	int width;
+	vector<vector<int> > mapFromPlannedRoute;
 	cv::Mat_<cv::Vec3b> routeCvMat;
 	string plannedRoute;
 	vector<Location> waypoints;

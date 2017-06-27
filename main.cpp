@@ -1,13 +1,19 @@
-#include "Map.h"
 #include <HamsterAPIClientCPP/Hamster.h>
 #include <iostream>
+#include "math.h"
 #include "stdlib.h"
 #include "Globals.h"
 #include "PathPlanner.h"
+#include "Map.h"
 #include "WaypointsManager.h"
 #include "DisplayManager.h"
+#include "Robot.h"
+#include "Scan.h"
+#include "LocalizationManager.h"
 using namespace std;
 using namespace HamsterAPI;
+
+void HandleMovement(int numOfWaypoints, vector<Location> * waypoints, Robot * robot, LocalizationManager * localizationManager, Scan * scan);
 
 int main()
 {
@@ -25,20 +31,36 @@ int main()
 				Location goalLocation = { .x = X_GOAL, .y = Y_GOAL };
 
 				Map map = Map(&occupancyGrid, ROBOT_SIZE_IN_CM, startLocation, goalLocation);
-				//map.PrintInflatedCvMat();
 
 				Grid grid = map.grid;
+				Robot robot = Robot(grid.GetGridHeight(), grid.GetGridWidth());
+
+				Location robotLocation = { .x = X_START, .y = Y_START, .yaw = YAW_START };
+
+				for (int i = 0; i < 20; i++)
+				{
+					robot.SetFirstPos(robotLocation.x, robotLocation.y, robotLocation.yaw);
+					robot.Read();
+				}
+
+				LocalizationManager localizationManager;
+				localizationManager.RandomizeParticles(robotLocation);
 
 				PathPlanner pathPlanner = PathPlanner(&grid);
 				string plannedRoute = pathPlanner.plannedRoute;
 
 				WayPointsManager waypointsManager;
-
 				int numOfWaypoints = waypointsManager.CreateWaypoints(plannedRoute, startLocation, goalLocation);
+
 				vector<Location> waypoints = waypointsManager.waypoints;
 
 				DisplayManager displayManager = DisplayManager(&grid, plannedRoute, &waypoints);
-				displayManager.PrintRouteCvMat();
+				//displayManager.PrintRouteCvMat();
+
+				vector<vector<int> > mapFromPlannedRoute = displayManager.mapFromPlannedRoute;
+				Scan scan = Scan(mapFromPlannedRoute, grid.GetGridWidth(), grid.GetGridHeight(), grid.GetMapResolution(), robot.GetLaser());
+
+				HandleMovement(numOfWaypoints, &waypoints, &robot, &localizationManager, &scan);
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{
@@ -52,4 +74,34 @@ int main()
 	}
 
 	return 0;
+}
+
+void HandleMovement(int numOfWaypoints, vector<Location> * waypoints, Robot * robot, LocalizationManager * localizationManager, Scan * scan)
+{
+	Location prevLocation = { .x = robot->GetXPosition(), .y = robot->GetYPosition() };
+
+	for (int i = 0; i < numOfWaypoints; i++)
+	{
+		robot->MoveTo(waypoints->at(i));
+
+		robot->Read();
+
+		Location currLocation = { .x = robot->GetXPosition(), .y = robot->GetYPosition(), .yaw = robot->GetYaw() };
+
+		double deltaToDestionation = sqrt(pow(prevLocation.x - currLocation.x, 2) +
+										  pow(prevLocation.y - currLocation.y, 2)) ;
+
+		// moving particles by destinationDelta
+		localizationManager->MoveParticles(deltaToDestionation);
+
+		// Get The location that has the highest accuracy on scans
+		Location newLocation = localizationManager->GetBestLocation(*scan, currLocation);
+
+		prevLocation.x = currLocation.x;
+		prevLocation.y = currLocation.y;
+
+		// Set new Location
+		robot->SetVirtualLocation(newLocation);
+		localizationManager->RandomizeParticles(currLocation);
+	}
 }

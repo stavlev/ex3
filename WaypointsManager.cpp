@@ -3,6 +3,7 @@
 using namespace std;
 
 #define MAX_NUM_OF_WAYPOINTS 100
+#define MAX_DISTANCE_BETWEEN_WAYPOINTS 4
 
 int WayPointsManager::CreateWaypoints(string plannedRoute, Location startLocation, Location goalLocation)
 {
@@ -33,7 +34,7 @@ int WayPointsManager::CreateWaypoints(string plannedRoute, Location startLocatio
 			directionCharacter = plannedRoute.at(i);
 			currDirectionIndex = numericCharToInt(directionCharacter);
 
-			bool isCurrPointContinuationOfWay = currDirectionIndex == prevDirectionIndex/* && directionsCounter <= 4*/;
+			bool isCurrPointContinuationOfWay = currDirectionIndex == prevDirectionIndex && directionsCounter <= MAX_DISTANCE_BETWEEN_WAYPOINTS;
 			bool isWaypoint = directionsCounter == 0 || isCurrPointContinuationOfWay;
 
 			if (isWaypoint)

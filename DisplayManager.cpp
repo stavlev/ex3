@@ -26,7 +26,6 @@ DisplayManager::DisplayManager(Grid * grid, string plannedRoute, vector<Location
 void DisplayManager::InitMapWithRoute()
 {
 	Location start = { .x = startCol, .y = startRow };
-	vector<vector<int> > mapFromPlannedRoute;
 
 	mapFromPlannedRoute.resize(height);
 

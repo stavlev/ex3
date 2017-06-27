@@ -169,13 +169,6 @@ bool Map::DoesCellHaveOccupiedNeighbor(int rowIndex, int colIndex)
 	return false;
 }
 
-void Map::PrintInflatedCvMat()
-{
-	cv::namedWindow("OccupancyGrid-view-inflated");
-	cv::imshow("OccupancyGrid-view-inflated", inflatedCvMat);
-	cv::waitKey(1);
-}
-
 Map::~Map() {
 	// TODO Auto-generated destructor stub
 }
