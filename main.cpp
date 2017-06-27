@@ -31,7 +31,7 @@ int main()
 				Map map = Map(&occupancyGrid, ROBOT_SIZE_IN_CM, startLocation, goalLocation);
 
 				Grid grid = map.grid;
-				Robot robot = Robot(grid.GetGridHeight(), grid.GetGridWidth());
+				Robot robot = Robot(hamster, grid.GetGridHeight(), grid.GetGridWidth());
 
 				Location robotLocation = { .x = X_START, .y = Y_START, .yaw = YAW_START };
 

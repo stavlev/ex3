@@ -12,9 +12,9 @@
 #define ROTATE_SPEED 0.15
 #define MOVE_SPEED 0.05
 
-Robot::Robot(int gridHeight, int gridWidth)
+Robot::Robot(HamsterAPI::Hamster * hamster, int gridHeight, int gridWidth)
 {
-	_hamster = new HamsterAPI::Hamster(1);
+	_hamster = hamster;
 	HamsterAPI::LidarScan lidarScan = _hamster->getLidarScan();
 	_lidarScan = &lidarScan;
 

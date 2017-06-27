@@ -37,7 +37,7 @@ public:
 	double gridResolution;
 	int gridHeight;
 	int gridWidth;
-	Robot(int gridHeight, int gridWidth);
+	Robot(HamsterAPI::Hamster * hamster, int gridHeight, int gridWidth);
 	void MoveTo(Location destination);
 	Location Read();
 	void SetFirstPos(double x, double y, double yaw);
