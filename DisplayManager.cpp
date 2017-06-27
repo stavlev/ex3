@@ -63,12 +63,17 @@ void DisplayManager::InitMapWithRoute()
 
 		(mapFromPlannedRoute.at(y)).at(x) = START;
 
-		for (unsigned int i = 0; i < plannedRoute.length(); i++)
+		for (int i = 0; i < plannedRoute.length(); i++)
 		{
 			directionCharacter = plannedRoute.at(i);
 			currDirectionIndex = numericCharToInt(directionCharacter);
 
-			(mapFromPlannedRoute.at(y)).at(x) = ROUTE;
+			int currLocation = (mapFromPlannedRoute.at(y)).at(x);
+
+			if (currLocation != START)
+			{
+				(mapFromPlannedRoute.at(y)).at(x) = ROUTE;
+			}
 
 			chosenXDirection = dirX[currDirectionIndex];
 			chosenYDirection = dirY[currDirectionIndex];
