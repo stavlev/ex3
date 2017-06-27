@@ -1,11 +1,4 @@
-#include "Globals.h"
 #include "PathPlanner.h"
-#include "Map.h"
-#include <iostream>
-#include <math.h>
-#include <HamsterAPIClientCPP/Hamster.h>
-using namespace std;
-using namespace HamsterAPI;
 
 PathPlanner::PathPlanner(const Grid * grid)
 {

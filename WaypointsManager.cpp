@@ -1,19 +1,14 @@
 #include "WaypointsManager.h"
-#include <iostream>
-using namespace std;
-
-#define MAX_NUM_OF_WAYPOINTS 100
-#define MAX_DISTANCE_BETWEEN_WAYPOINTS 4
 
 int WayPointsManager::CreateWaypoints(string plannedRoute, Location startLocation, Location goalLocation)
 {
-	int numOfWayPoints = 0;
+	int numOfWaypoints = 0;
 	waypoints.resize(MAX_NUM_OF_WAYPOINTS);
 
 	if (plannedRoute.length() <= 0)
 	{
-		cout << "No route found";
-		cout << endl;
+		// No route found => numOfWaypoints is 0
+		return 0;
 	}
 	else
 	{
@@ -44,13 +39,13 @@ int WayPointsManager::CreateWaypoints(string plannedRoute, Location startLocatio
 			else
 			{
 				// Create a new waypoint
-				waypoints.at(numOfWayPoints).x = x;
-				waypoints.at(numOfWayPoints).y = y;
+				waypoints.at(numOfWaypoints).x = x;
+				waypoints.at(numOfWaypoints).y = y;
 
 				prevDirectionIndex = currDirectionIndex;
 
 				directionsCounter = 0;
-				numOfWayPoints++;
+				numOfWaypoints++;
 			}
 
 			chosenXDirection = dirX[currDirectionIndex];
@@ -62,7 +57,7 @@ int WayPointsManager::CreateWaypoints(string plannedRoute, Location startLocatio
 	}
 
 	//goalLocation.y = -goalLocation.y;
-	waypoints.at(numOfWayPoints) = goalLocation;
+	waypoints.at(numOfWaypoints) = goalLocation;
 
-	return numOfWayPoints + 1;
+	return numOfWaypoints + 1;
 }

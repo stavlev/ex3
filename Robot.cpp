@@ -6,8 +6,7 @@
  */
 
 #include "Robot.h"
-#include "math.h"
-#include "Globals.h"
+#include <math.h>
 
 #define ROTATE_SPEED 0.15
 #define MOVE_SPEED 0.05

@@ -3,13 +3,13 @@
 
 #include "Globals.h"
 #include <vector>
-
 using namespace std;
 
-class Grid {
+class Grid
+{
 private:
 	double mapResolution;
-	vector< vector<bool> > grid;
+	vector<vector<bool> > grid;
 	int gridWidth;
 	int gridHeight;
 	Location startLocation;

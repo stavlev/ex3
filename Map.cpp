@@ -1,12 +1,4 @@
 #include "Map.h"
-#include <unistd.h>
-#include <iostream>
-#include "math.h"
-using namespace std;
-
-#define WHITE_COLOR 255;
-#define GRAY_COLOR 128;
-#define BLACK_COLOR 0;
 
 Map::Map(){
 }

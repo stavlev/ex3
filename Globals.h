@@ -15,6 +15,10 @@
 #define X_GOAL 455
 #define Y_GOAL 365
 
+#define WHITE_COLOR 255;
+#define GRAY_COLOR 128;
+#define BLACK_COLOR 0;
+
 #define OBSTACLE 1
 #define START 2
 #define ROUTE 3
@@ -22,11 +26,11 @@
 #define WAYPOINT 5
 
 #define NUMBER_OF_PARTICLES 1000
+#define MAX_NUM_OF_WAYPOINTS 100
+#define MAX_DISTANCE_BETWEEN_WAYPOINTS 4
 
 #define numericCharToInt(numChar) (numChar - '0')
-// Converts degrees to radians
 #define degreesToRadians(angleDegrees) (angleDegrees * M_PI / 180.0)
-// Converts radians to degrees
 #define radiansToDegrees(angleRadians) (angleRadians * 180.0 / M_PI)
 
 struct Location {

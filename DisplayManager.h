@@ -10,20 +10,22 @@
 
 #include "Globals.h"
 #include "Grid.h"
-#include "Node.h"
 #include <string>
 #include <vector>
 #include <queue>
+#include <HamsterAPIClientCPP/Hamster.h>
 using namespace std;
+using namespace HamsterAPI;
 
-class DisplayManager {
+class DisplayManager
+{
 public:
 	Grid grid;
 	int startRow;
 	int startCol;
 	int goalRow;
 	int goalCol;
-	vector< vector<bool> > occupationMap;
+	vector<vector<bool> > occupationMap;
 	int height;
 	int width;
 	vector<vector<int> > mapFromPlannedRoute;

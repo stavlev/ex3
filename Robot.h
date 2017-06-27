@@ -8,10 +8,10 @@
 #ifndef ROBOT_H_
 #define ROBOT_H_
 
+#include "Globals.h"
 #include <string.h>
 #include <iostream>
 #include <vector>
-#include "Globals.h"
 #include <HamsterAPIClientCPP/Hamster.h>
 using namespace std;
 using namespace HamsterAPI;

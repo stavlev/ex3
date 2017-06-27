@@ -8,7 +8,6 @@
 #ifndef PATHPLANNER_H_
 #define PATHPLANNER_H_
 
-#include "Globals.h"
 #include "Grid.h"
 #include "Node.h"
 #include <string>
@@ -26,7 +25,8 @@ struct NodePriorityComparer {
 // list of open (not-yet-tried) nodes
 static priority_queue<Node, std::vector<Node>, NodePriorityComparer> openNodesQueues[2];
 
-class PathPlanner {
+class PathPlanner
+{
 private:
 	Grid grid;
 	int startRow;

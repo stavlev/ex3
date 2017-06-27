@@ -8,10 +8,10 @@
 #ifndef WAYPOINTSMANAGER_H_
 #define WAYPOINTSMANAGER_H_
 
-using namespace std;
 #include "Globals.h"
 #include <string>
 #include <vector>
+using namespace std;
 
 class WayPointsManager
 {

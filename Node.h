@@ -8,7 +8,7 @@
 #ifndef NODE_H_
 #define NODE_H_
 
-#include "Grid.h"
+#include "Globals.h"
 #include <math.h>
 #include <HamsterAPIClientCPP/Hamster.h>
 using namespace std;

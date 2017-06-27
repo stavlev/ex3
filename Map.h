@@ -7,7 +7,8 @@
 using namespace std;
 using namespace HamsterAPI;
 
-class Map {
+class Map
+{
 private:
 	OccupancyGrid map;
 	double mapResolutionInCm;	/* Each OccupancyGrid cell takes an area of mapResolutionInCm^2 centimeters */
