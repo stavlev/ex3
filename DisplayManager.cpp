@@ -58,17 +58,17 @@ void DisplayManager::InitMapWithRoute()
 		int chosenYDirection;
 		bool isWaypoint = false;
 
-		unsigned int x = start.y;
-		unsigned int y = start.x;
+		unsigned int x = start.x;
+		unsigned int y = start.y;
 
-		(mapFromPlannedRoute.at(x)).at(y) = START;
+		(mapFromPlannedRoute.at(y)).at(x) = START;
 
 		for (unsigned int i = 0; i < plannedRoute.length(); i++)
 		{
 			directionCharacter = plannedRoute.at(i);
 			currDirectionIndex = numericCharToInt(directionCharacter);
 
-			(mapFromPlannedRoute.at(x)).at(y) = ROUTE;
+			(mapFromPlannedRoute.at(y)).at(x) = ROUTE;
 
 			chosenXDirection = dirX[currDirectionIndex];
 			chosenYDirection = dirY[currDirectionIndex];
@@ -77,18 +77,18 @@ void DisplayManager::InitMapWithRoute()
 			y += chosenYDirection;
 		}
 
-		(mapFromPlannedRoute.at(x)).at(y) = GOAL;
+		(mapFromPlannedRoute.at(y)).at(x) = GOAL;
 
 		// Iterate through all waypoints and mark them on the map
 		for (int i = 0; i < waypoints.size(); i++)
 		{
 			Location currWaypoint = waypoints.at(i);
 
-			int currLocation = (mapFromPlannedRoute.at(currWaypoint.x)).at(currWaypoint.y);
+			int currLocation = (mapFromPlannedRoute.at(currWaypoint.y)).at(currWaypoint.x);
 
 			if (currLocation != START && currLocation != GOAL)
 			{
-				(mapFromPlannedRoute.at(currWaypoint.x)).at(currWaypoint.y) = WAYPOINT;
+				(mapFromPlannedRoute.at(currWaypoint.y)).at(currWaypoint.x) = WAYPOINT;
 			}
 		}
 

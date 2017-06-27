@@ -55,14 +55,14 @@ string PathPlanner::FindAStarRoute()
 	}
 
 	// Create the start node and push into list of open nodes
-	Location startLocation = { .x = startRow, .y = startCol };
+	Location startLocation = { .x = startCol, .y = startRow };
 	nNodeA = new Node(startLocation, 0, 0);
-	nNodeA->UpdatePriority(goalRow, goalCol);
+	nNodeA->UpdatePriority(goalCol, goalRow);
 	(openNodesQueues[smallerPQIndex]).push(*nNodeA);
 
 	// mark it on the open nodes map
-	rowIndex = nNodeA->GetLocation().x;
-	colIndex = nNodeA->GetLocation().y;
+	rowIndex = nNodeA->GetLocation().y;
+	colIndex = nNodeA->GetLocation().x;
 	(open_nodes_map.at(rowIndex)).at(colIndex) = nNodeA->GetPriority();
 
 	// A* search
@@ -74,8 +74,8 @@ string PathPlanner::FindAStarRoute()
 				highestPriorityNode.GetLevel(),
 				highestPriorityNode.GetPriority());
 
-		rowIndex = nNodeA->GetLocation().x;
-		colIndex = nNodeA->GetLocation().y;
+		rowIndex = nNodeA->GetLocation().y;
+		colIndex = nNodeA->GetLocation().x;
 
 		// Remove the node from the open list
 		(openNodesQueues[smallerPQIndex]).pop();
@@ -97,8 +97,8 @@ string PathPlanner::FindAStarRoute()
 				c = '0' + (cellIndex + dirNum / 2) % dirNum;
 				plannedRoute = c + plannedRoute;
 
-				rowIndex += dirX[cellIndex];
-				colIndex += dirY[cellIndex];
+				rowIndex += dirY[cellIndex];
+				colIndex += dirX[cellIndex];
 			}
 
 			// Delete node and all left nodes
@@ -115,40 +115,40 @@ string PathPlanner::FindAStarRoute()
 		// Generate all possible moves
 		for (dirIndex = 0; dirIndex < dirNum; dirIndex++)
 		{
-			Location location = { .x = rowIndex + dirX[dirIndex], .y = colIndex + dirY[dirIndex] };
+			Location location = { .x = colIndex + dirX[dirIndex], .y = rowIndex + dirY[dirIndex] };
 
 			bool isLocationInBounds =
 					location.x >= 0 && location.x <= height - 1
 					&& location.y >= 0 && location.y <= width - 1;
-			bool isCellNotOccupied = (occupationMap.at(location.x)).at(location.y) != 1;
-			bool isNodeNotClosed = (closed_nodes_map.at(location.x)).at(location.y) != 1;
+			bool isCellNotOccupied = (occupationMap.at(location.y)).at(location.x) != 1;
+			bool isNodeNotClosed = (closed_nodes_map.at(location.y)).at(location.x) != 1;
 
 			if (isLocationInBounds && isCellNotOccupied && isNodeNotClosed)
 			{
 				// Generate a child node
 				nNodeB = new Node(location, nNodeA->GetLevel(), nNodeA->GetPriority());
 				nNodeB->NextLevel(dirIndex);
-				nNodeB->UpdatePriority(goalRow, goalCol);
+				nNodeB->UpdatePriority(goalCol, goalRow);
 
 				// If the node isn't in the open list - add it
-				bool isNodeNotOpened = (open_nodes_map.at(location.x)).at(location.y) == 0;
+				bool isNodeNotOpened = (open_nodes_map.at(location.y)).at(location.x) == 0;
 
 				if (isNodeNotOpened)
 				{
-					(open_nodes_map.at(location.x)).at(location.y) = nNodeB->GetPriority();
+					(open_nodes_map.at(location.y)).at(location.x) = nNodeB->GetPriority();
 					(openNodesQueues[smallerPQIndex]).push(*nNodeB);
 
 					// mark its parent node direction
-					(all_possible_directions.at(location.x)).at(location.y) =
+					(all_possible_directions.at(location.y)).at(location.x) =
 							(dirIndex + dirNum / 2) % dirNum;
 				}
-				else if ((open_nodes_map.at(location.x)).at(location.y) > nNodeB->GetPriority())
+				else if ((open_nodes_map.at(location.y)).at(location.x) > nNodeB->GetPriority())
 				{
 					// Update the priority info
-					(open_nodes_map.at(location.x)).at(location.y) = nNodeB->GetPriority();
+					(open_nodes_map.at(location.y)).at(location.x) = nNodeB->GetPriority();
 
 					// Update the parent direction info
-					(all_possible_directions.at(location.x)).at(location.y) =
+					(all_possible_directions.at(location.y)).at(location.x) =
 							(dirIndex + dirNum / 2) % dirNum;
 
 					/* Replace the node by emptying one priority queue to the other one
