@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include "HamsterAPIClientCPP/Hamster.h"
 #include <time.h>
-
 using namespace std;
+using namespace HamsterAPI;
 
 class RandomWalk
 {
@@ -21,7 +21,7 @@ private:
 	HamsterAPI::Hamster * hamster;
 
 public:
-	double * deltaX, * deltaY, * deltaYaw, * yaw ;
+	double * deltaX, * deltaY, * deltaYaw, * yaw;
 	RandomWalk(HamsterAPI::Hamster * hamster);
 	double GetNearestObstacleDistanceForword(HamsterAPI::LidarScan scan, int span);
 	double GetNearestObstacleDistanceLeft(HamsterAPI::LidarScan scan, int span);

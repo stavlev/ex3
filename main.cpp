@@ -11,6 +11,7 @@ int main()
 	try
 	{
 		Hamster* hamster = new HamsterAPI::Hamster(1);
+		sleep(1);
 		OccupancyGrid occupancyGrid = hamster->getSLAMMap();
 
 		Location startLocation = { .x = X_START, .y = Y_START, .yaw = YAW_START };

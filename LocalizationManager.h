@@ -11,7 +11,6 @@
 #include "Particle.h"
 #include <vector>
 #include <HamsterAPIClientCPP/Hamster.h>
-
 using namespace std;
 using namespace HamsterAPI;
 

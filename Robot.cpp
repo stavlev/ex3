@@ -7,7 +7,7 @@
 
 #include "Robot.h"
 
-Robot::Robot(Hamster *hamster) : hamster(hamster), prevX(0), prevY(0), prevYaw(0), currX(0), currY(0), currYaw(0)
+Robot::Robot(Hamster * hamster) : hamster(hamster), prevX(0), prevY(0), prevYaw(0), currX(0), currY(0), currYaw(0)
 {
 	UpdatePose();
 }
@@ -31,7 +31,7 @@ void Robot::UpdatePose()
 {
 	Pose pose = hamster->getPose();
 
-	//We update the current and previous locations by the position of the robot
+	// Update the current and previous locations by the position of the robot
 	prevX = currX;
 	prevY = currY;
 	prevYaw = currYaw;
