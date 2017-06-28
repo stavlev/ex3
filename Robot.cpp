@@ -27,6 +27,16 @@ double Robot::GetDeltaYaw() const
 	return currYaw - prevYaw;
 }
 
+Location Robot::GetCurrentLocation()
+{
+	Pose pose = hamster->getPose();
+
+	Location currLocation;
+	currLocation = { .x = pose.getX(), .y = pose.getY(), .yaw = pose.getHeading() };
+
+	return currLocation;
+}
+
 void Robot::UpdatePose()
 {
 	Pose pose = hamster->getPose();

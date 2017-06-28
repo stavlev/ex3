@@ -8,6 +8,7 @@
 #ifndef ROBOT_H_
 #define ROBOT_H_
 
+#include "Globals.h"
 #include <HamsterAPIClientCPP/Hamster.h>
 using namespace HamsterAPI;
 
@@ -30,6 +31,7 @@ public:
 	double GetDeltaX() const;
 	double GetDeltaY() const;
 	double GetDeltaYaw() const;
+	Location GetCurrentLocation();
 	void UpdatePose();
 	virtual ~Robot();
 };

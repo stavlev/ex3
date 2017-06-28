@@ -1,6 +1,6 @@
 #include "WaypointsManager.h"
 
-void WayPointsManager::CreateWaypoints(string plannedRoute, Location startLocation, Location goalLocation)
+int WayPointsManager::CalculateWaypoints(string plannedRoute, Location startLocation, Location goalLocation)
 {
 	int numOfWaypoints = 0;
 	waypoints.resize(MAX_NUM_OF_WAYPOINTS);
@@ -8,7 +8,7 @@ void WayPointsManager::CreateWaypoints(string plannedRoute, Location startLocati
 	if (plannedRoute.length() <= 0)
 	{
 		// No route found
-		return;
+		return 0;
 	}
 	else
 	{
@@ -58,4 +58,6 @@ void WayPointsManager::CreateWaypoints(string plannedRoute, Location startLocati
 
 	//goalLocation.y = -goalLocation.y;
 	waypoints.at(numOfWaypoints) = goalLocation;
+
+	return numOfWaypoints;
 }

@@ -1,10 +1,11 @@
+#include "math.h"
 #include "PathPlanner.h"
 #include "Map.h"
 #include "WaypointsManager.h"
 #include "DisplayManager.h"
 #include "Robot.h"
 #include "LocalizationManager.h"
-#include "RandomWalk.h"
+#include "MovementManager.h"
 
 int main()
 {
@@ -28,29 +29,41 @@ int main()
 
 		WayPointsManager waypointsManager;
 
-		waypointsManager.CreateWaypoints(plannedRoute, startLocation, goalLocation);
+		int numOfWaypoints = waypointsManager.CalculateWaypoints(plannedRoute, startLocation, goalLocation);
 		vector<Location> waypoints = waypointsManager.waypoints;
 
 		// Print the map including the planned route and chosen waypoints
 		DisplayManager displayManager = DisplayManager(&grid, plannedRoute, &waypoints);
 		displayManager.PrintRouteCvMat();
 
-		RandomWalk randomWalk(hamster);
+		MovementManager movementManager(hamster);
 		localizationManager.InitParticles();
 
+		int count = 0, waypointIndex = 0;
 		double deltaX = 0,deltaY = 0, deltaYaw = 0, yaw = 0;
-		randomWalk.deltaX = &deltaX;
-		randomWalk.deltaY = &deltaY;
-		randomWalk.deltaYaw = &deltaYaw;
-		randomWalk.yaw = &yaw ;
 
-		int count = 0 ;
-
-		while (hamster->isConnected())
+		while (hamster->isConnected() && waypointIndex < numOfWaypoints)
 		{
 			try
 			{
-				randomWalk.ObstacleAvoidence(hamster);
+				Location currWaypoint = waypoints.at(waypointIndex);
+				Location currRobotLocation = robot.GetCurrentLocation();
+
+				double robotDistanceFromWaypoint =
+						sqrt(pow(currWaypoint.x - currRobotLocation.x, 2) +
+							 pow(currWaypoint.y - currRobotLocation.y, 2));
+
+				bool isWaypointReached = robotDistanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
+
+				if (isWaypointReached)
+				{
+					waypointIndex++;
+				}
+				else
+				{
+					movementManager.MoveTo(&robot, currRobotLocation, &currWaypoint);
+				}
+
 				usleep(444);
 				robot.UpdatePose();
 
@@ -66,7 +79,6 @@ int main()
 
 				localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);//robot.getDeltaX(), robot.getDeltaY(), robot.getDeltaYaw());
 				displayManager.PrintRouteCvMat(localizationManager.GetParticles());
-				//map.show(localizationManager.GetParticles());
 				//locManager.printParticles();
 			}
 			catch (const HamsterAPI::HamsterError & message_error)

@@ -99,20 +99,20 @@ void LocalizationManager::InitParticles()
 
 double LocalizationManager::ComputeBelief(Particle * particle)
 {
-	LidarScan scan = hamster->getLidarScan();
+	LidarScan lidarScan = hamster->getLidarScan();
 
 	int hits = 0;
 	int misses = 0;
 
-	for (int i = 0; i < scan.getScanSize(); i++)
+	for (int i = 0; i < lidarScan.getScanSize(); i++)
 	{
-		double angle = scan.getScanAngleIncrement() * i * DEG2RAD;
+		double angle = lidarScan.getScanAngleIncrement() * i * DEG2RAD;
 
-		if (scan.getDistance(i) < scan.getMaxRange() - 0.001)
+		if (lidarScan.getDistance(i) < lidarScan.getMaxRange() - 0.001)
 		{
 			// Obstacle_Pos = Particle_Pos + Scan_Distance * cos (Heading + Scan Angle)
-			double obsX = particle->x + scan.getDistance(i) * cos(angle + particle->yaw * DEG2RAD- 180 * DEG2RAD);
-			double obsY = particle->y + scan.getDistance(i) * sin(angle + particle->yaw * DEG2RAD- 180 * DEG2RAD);
+			double obsX = particle->x + lidarScan.getDistance(i) * cos(angle + particle->yaw * DEG2RAD- 180 * DEG2RAD);
+			double obsY = particle->y + lidarScan.getDistance(i) * sin(angle + particle->yaw * DEG2RAD- 180 * DEG2RAD);
 
 			int i = (double) ogrid.getHeight() / 2 - obsY / ogrid.getResolution();
 			int j = obsX / ogrid.getResolution() + ogrid.getWidth() / 2;
