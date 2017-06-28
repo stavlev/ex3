@@ -1,10 +1,3 @@
-/*
- * DisplayManager.cpp
- *
- *  Created on: Jun 27, 2017
- *      Author: user
- */
-
 #include "DisplayManager.h"
 
 DisplayManager::DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints)
@@ -19,8 +12,24 @@ DisplayManager::DisplayManager(Grid * grid, string plannedRoute, vector<Location
 
 	this->plannedRoute = plannedRoute;
 	this->waypoints = *waypoints;
+}
 
+void DisplayManager::PrintRouteCvMat()
+{
 	InitMapWithRoute();
+
+	cv::namedWindow("OccupancyGrid-view-route");
+	cv::imshow("OccupancyGrid-view-route", routeCvMat);
+	cv::waitKey(1);
+}
+
+void DisplayManager::PrintRouteCvMat(vector<Particle *> particles)
+{
+	InitMapWithParticles(particles);
+
+	cv::namedWindow("OccupancyGrid-view-particles");
+	cv::imshow("OccupancyGrid-view-particles", routeCvMat);
+	cv::waitKey(1);
 }
 
 void DisplayManager::InitMapWithRoute()
@@ -104,13 +113,62 @@ void DisplayManager::InitMapWithRoute()
 			for (int j = 0; j < width; j++)
 			{
 				int currentCellValue = (mapFromPlannedRoute.at(i)).at(j);
-				ColorPixelByCellValue(currentCellValue, i, j);
+				ColorPixelByRoute(currentCellValue, i, j);
 			}
 		}
 	}
 }
 
-void DisplayManager::ColorPixelByCellValue(int currentCellValue, int i, int j)
+void DisplayManager::InitMapWithParticles(vector<Particle *> particles)
+{
+	Location start = { .x = startCol, .y = startRow };
+
+	mapFromPlannedRoute.resize(height);
+
+	for (int i = 0; i < height; i++)
+	{
+		mapFromPlannedRoute.at(i).resize(width);
+	}
+
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			(mapFromPlannedRoute.at(i)).at(j) = (occupationMap.at(i)).at(j);
+		}
+	}
+
+	routeCvMat = cv::Mat(height, width, CV_8UC3, cv::Scalar::all(0));
+
+	for (int i = 0; i < particles.size(); i++)
+	{
+		Particle * currParticle = particles[i];
+		bool isTopParticle = i >= particles.size() - TOP_PARTICLES_NUM;
+
+		bool isTopBeliefParticle = isTopParticle /*&& currParticle->belief > BELIEF_LEVEL*/;
+
+		if (isTopBeliefParticle)
+		{
+			(mapFromPlannedRoute.at(currParticle->i)).at(currParticle->j) = TOP_PARTICLE;
+		}
+		else
+		{
+			(mapFromPlannedRoute.at(currParticle->i)).at(currParticle->j) = PARTICLE;
+		}
+	}
+
+	// Initialize the map with the particles
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			int currentCellValue = (mapFromPlannedRoute.at(i)).at(j);
+			ColorPixelByParticles(currentCellValue, i, j);
+		}
+	}
+}
+
+void DisplayManager::ColorPixelByRoute(int currentCellValue, int i, int j)
 {
 	switch(currentCellValue)
 	{
@@ -174,11 +232,52 @@ void DisplayManager::ColorPixelByCellValue(int currentCellValue, int i, int j)
 	}
 }
 
-void DisplayManager::PrintRouteCvMat()
+void DisplayManager::ColorPixelByParticles(int currentCellValue, int i, int j)
 {
-	cv::namedWindow("OccupancyGrid-view-route");
-	cv::imshow("OccupancyGrid-view-route", routeCvMat);
-	cv::waitKey(1);
+	switch(currentCellValue)
+	{
+		case(FREE_SPACE):
+		{
+			// Color in white
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 255;
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 255;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 255;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 255;
+			break;
+		}
+		case(OBSTACLE):
+		{
+			// Color in black
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 0;
+			break;
+		}
+		case(PARTICLE):
+		{
+			// Color in red
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 255;
+			break;
+		}
+		case(TOP_PARTICLE):
+		{
+			// Color in green
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 0;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 255;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 0;
+			break;
+		}
+		default:	// unknown
+		{
+			// Color in gray
+			routeCvMat.at<cv::Vec3b>(i, j)[0] = 128;
+			routeCvMat.at<cv::Vec3b>(i, j)[1] = 128;
+			routeCvMat.at<cv::Vec3b>(i, j)[2] = 128;
+			break;
+		}
+	}
 }
 
 DisplayManager::~DisplayManager()

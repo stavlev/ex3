@@ -1,15 +1,9 @@
-/*
- * DisplayManager.h
- *
- *  Created on: Jun 27, 2017
- *      Author: user
- */
-
 #ifndef DISPLAYMANAGER_H_
 #define DISPLAYMANAGER_H_
 
 #include "Globals.h"
 #include "Grid.h"
+#include "Particle.h"
 #include <string>
 #include <vector>
 #include <queue>
@@ -19,7 +13,7 @@ using namespace HamsterAPI;
 
 class DisplayManager
 {
-public:
+private:
 	Grid grid;
 	int startRow;
 	int startCol;
@@ -32,10 +26,14 @@ public:
 	cv::Mat_<cv::Vec3b> routeCvMat;
 	string plannedRoute;
 	vector<Location> waypoints;
-	DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints);
 	void InitMapWithRoute();
-	void ColorPixelByCellValue(int currentCellValue, int i, int j);
+	void InitMapWithParticles(vector<Particle *> particles);
+	void ColorPixelByRoute(int currentCellValue, int i, int j);
+	void ColorPixelByParticles(int currentCellValue, int i, int j);
+public:
+	DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints);
 	void PrintRouteCvMat();
+	void PrintRouteCvMat(vector<Particle *> particles);
 	virtual ~DisplayManager();
 };
 

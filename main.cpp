@@ -11,7 +11,7 @@ int main()
 	try
 	{
 		Hamster* hamster = new HamsterAPI::Hamster(1);
-		sleep(1);
+		sleep(3);
 		OccupancyGrid occupancyGrid = hamster->getSLAMMap();
 
 		Location startLocation = { .x = X_START, .y = Y_START, .yaw = YAW_START };
@@ -28,13 +28,13 @@ int main()
 
 		WayPointsManager waypointsManager;
 
-		int numOfWaypoints = waypointsManager.CreateWaypoints(plannedRoute, startLocation, goalLocation);
+		waypointsManager.CreateWaypoints(plannedRoute, startLocation, goalLocation);
 		vector<Location> waypoints = waypointsManager.waypoints;
 
+		// Print the map including the planned route and chosen waypoints
 		DisplayManager displayManager = DisplayManager(&grid, plannedRoute, &waypoints);
 		displayManager.PrintRouteCvMat();
 
-		//Map map(ogrid);
 		RandomWalk randomWalk(hamster);
 		localizationManager.InitParticles();
 
@@ -65,7 +65,8 @@ int main()
 						" deltaYaw : " << robot.GetDeltaYaw() << endl;
 
 				localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);//robot.getDeltaX(), robot.getDeltaY(), robot.getDeltaYaw());
-				//map.show(locaizationManager.GetParticles());
+				displayManager.PrintRouteCvMat(localizationManager.GetParticles());
+				//map.show(localizationManager.GetParticles());
 				//locManager.printParticles();
 			}
 			catch (const HamsterAPI::HamsterError & message_error)

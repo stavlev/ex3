@@ -17,7 +17,7 @@ class WayPointsManager
 {
 public:
 	vector<Location> waypoints;
-	int CreateWaypoints(string plannedRoute, Location startLocation, Location goalLocation);
+	void CreateWaypoints(string plannedRoute, Location startLocation, Location goalLocation);
 };
 
 #endif /* WAYPOINTSMANAGER_H_ */
