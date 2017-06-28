@@ -10,9 +10,7 @@
 
 #include "Globals.h"
 #include <math.h>
-#include <HamsterAPIClientCPP/Hamster.h>
 using namespace std;
-using namespace HamsterAPI;
 
 class Node
 {

@@ -6,7 +6,6 @@
 #include "Robot.h"
 //#include "Scan.h"
 //#include "LocalizationManager.h"
-using namespace std;
 
 int main()
 {

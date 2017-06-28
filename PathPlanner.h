@@ -15,7 +15,8 @@
 #include <queue>
 using namespace std;
 
-struct NodePriorityComparer {
+struct NodePriorityComparer
+{
     bool operator()(const Node& nodeA, const Node& nodeB)
     {
     	return nodeA.GetPriority() > nodeB.GetPriority();
@@ -23,7 +24,7 @@ struct NodePriorityComparer {
 };
 
 // list of open (not-yet-tried) nodes
-static priority_queue<Node, std::vector<Node>, NodePriorityComparer> openNodesQueues[2];
+static priority_queue<Node, vector<Node>, NodePriorityComparer> openNodesQueues[2];
 
 class PathPlanner
 {
@@ -36,9 +37,6 @@ private:
 	vector< vector<bool> > occupationMap;
 	int height;
 	int width;
-	cv::Mat_<cv::Vec3b> routeCvMat;
-	void InitMapWithRoute();
-	void ColorPixelByCellValue(int currentCellValue, int i, int j);
 
 public:
 	string plannedRoute;

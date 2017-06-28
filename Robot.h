@@ -41,7 +41,7 @@ public:
 	void MoveTo(Location destination);
 	Location Read();
 	void SetFirstPos(double x, double y, double yaw);
-	LidarScan * GetLaser();
+	HamsterAPI::LidarScan * GetLaser();
 	double GetXPosition();
 	double GetYPosition();
 	double GetYaw();

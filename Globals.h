@@ -29,6 +29,9 @@
 #define MAX_NUM_OF_WAYPOINTS 100
 #define MAX_DISTANCE_BETWEEN_WAYPOINTS 4
 
+#define NUMBER_OF_RAYS 6
+#define ANGLE_BETWEEN_RAYS 20
+
 #define numericCharToInt(numChar) (numChar - '0')
 #define degreesToRadians(angleDegrees) (angleDegrees * M_PI / 180.0)
 #define radiansToDegrees(angleRadians) (angleRadians * 180.0 / M_PI)
