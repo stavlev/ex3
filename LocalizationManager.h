@@ -8,33 +8,35 @@
 #ifndef LOCALIZATIONMANAGER_H_
 #define LOCALIZATIONMANAGER_H_
 
-#include "Globals.h"
 #include "Particle.h"
-#include "Scan.h"
 #include <vector>
+#include <HamsterAPIClientCPP/Hamster.h>
 
 using namespace std;
+using namespace HamsterAPI;
 
-
-#include "Globals.h"
-#include "Particle.h"
-#include "Scan.h"
-#include <stdlib.h>
-
+/**
+    LocalizationManager.h
+    Purpose: Manages all the particles on the map
+    		 gets rid of old ones create new with better belief
+*/
 class LocalizationManager
 {
 private:
-	Location _currentLocation;
-	vector<Particle> _particles;
+	vector<Particle *> particles;
+	const OccupancyGrid & ogrid;
+	Hamster * hamster;
+	void GetRandomLocation(Particle * particleToUpdate);
+	void GetRandomLocationNextTo(Particle * particleToUpdate, Particle * betterParticle);
+	double ComputeBelief(Particle * particle);
+	bool InsertOutOfRangeParticle(Particle * particle);
+
 public:
-	LocalizationManager();
-	void RandomizeParticles(Location originalLocation);
-	Location RandomizeLocation(Location originalLocation);
-	Location GetBestLocation(Scan scan, Location originLocation);
-	void MoveParticles(double deltaDetination);
-	vector<vector<int> > PrintParticlesOnPixels(
-			vector<vector<int> > mapFromPlannedRoute, int width, int height,
-			double resolutionInCM, Location current, Location chosen);
+	LocalizationManager(const OccupancyGrid &ogrid, Hamster * hamster);
+	void InitParticles();
+	void UpdateParticles(double deltaX, double deltaY, double deltaYaw);
+	void PrintParticles() const;
+	vector<Particle *> GetParticles() const;
 	virtual ~LocalizationManager();
 };
 

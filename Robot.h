@@ -8,44 +8,30 @@
 #ifndef ROBOT_H_
 #define ROBOT_H_
 
-#include "Globals.h"
-#include <string.h>
-#include <iostream>
-#include <vector>
 #include <HamsterAPIClientCPP/Hamster.h>
-using namespace std;
 using namespace HamsterAPI;
 
-class Robot {
+/**
+    Robot.h
+    Purpose: This class uses to calculate the "delta" in the movement
+    	     of the Hamster robot.
+    	     Its main function of this class- updatePose should be called
+    	     every time the Hamster moves.
+*/
+class Robot
+{
 private:
-	HamsterAPI::Hamster * _hamster;
-	HamsterAPI::LidarScan * _lidarScan;
-	double _x;
-	double _y;
-	double _yaw;
-	double _oldX;
-	double _oldY;
-	double _oldYaw;
-	double _xDeltaFromVirtual;
-	double _yDeltaFromVirtual;
-	double _yawDeltaFromVirtual;
+	double currX, currY, currYaw;
+	double prevX, prevY, prevYaw;
+	Hamster * hamster;
 
 public:
-	double robotWidth;
-	double robotLengt;
-	double mapResolution;
-	double gridResolution;
-	int gridHeight;
-	int gridWidth;
-	Robot(HamsterAPI::Hamster * hamster, int gridHeight, int gridWidth);
-	void MoveTo(Location destination);
-	Location Read();
-	void SetFirstPos(double x, double y, double yaw);
-	HamsterAPI::LidarScan * GetLaser();
-	double GetXPosition();
-	double GetYPosition();
-	double GetYaw();
-	void SetVirtualLocation(Location location);
+	Robot(Hamster *hamster);
+	double GetDeltaX() const;
+	double GetDeltaY() const;
+	double GetDeltaYaw() const;
+	void UpdatePose();
+	virtual ~Robot();
 };
 
 #endif /* ROBOT_H_ */
