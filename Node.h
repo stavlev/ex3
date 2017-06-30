@@ -8,9 +8,7 @@
 #ifndef NODE_H_
 #define NODE_H_
 
-#include "Globals.h"
-#include <math.h>
-using namespace std;
+#include "Location.h"
 
 class Node
 {

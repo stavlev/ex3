@@ -6,23 +6,24 @@
  */
 
 #include "Particle.h"
-
-Particle::Particle(double posX, double posY, double yaw)
-{
-	_posX = posX;
-	_posY = posY;
-	_yaw = yaw;
-}
+#include <math.h>
 
 Particle::Particle()
 {
+}
+
+Particle::Particle(double posX, double posY, double yaw)
+{
+	this->x = posX;
+	this->y = posY;
+	this->yaw = yaw;
 }
 
 double Particle::GetBelief(vector <double> readings, vector <double> simulatedReadings, int readingsNumber)
 {
 	double accuracySum = 0;
 
-	for(int readingIndex = 0; readingIndex < readingsNumber; readingIndex++)
+	for (int readingIndex = 0; readingIndex < readingsNumber; readingIndex++)
 	{
 		double actualReading = readings.at(readingIndex);
 		double simulatedReading = simulatedReadings.at(readingIndex);
@@ -38,30 +39,15 @@ double Particle::GetBelief(vector <double> readings, vector <double> simulatedRe
 
 void Particle::Move(double deltaDetination)
 {
-	double xDelta = deltaDetination * cos(_yaw);
-	double yDelta = deltaDetination * sin(_yaw);
-	_posX += xDelta;
-	_posY += yDelta;
-}
-
-double Particle::GetPosX()
-{
-	return _posX;
-}
-
-double Particle::GetPosY()
-{
-	return _posY;
-}
-
-double Particle::GetYaw()
-{
-	return _yaw;
+	double xDelta = deltaDetination * cos(yaw);
+	double yDelta = deltaDetination * sin(yaw);
+	x += xDelta;
+	y += yDelta;
 }
 
 Location Particle::GetLocation()
 {
-	Location location = { .x = _posX, .y = _posY, .yaw = _yaw };
+	Location location = { .x = x, .y = y, .yaw = yaw };
 
 	return location;
 }

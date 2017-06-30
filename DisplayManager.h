@@ -1,7 +1,7 @@
 #ifndef DISPLAYMANAGER_H_
 #define DISPLAYMANAGER_H_
 
-#include "Globals.h"
+#include "Location.h"
 #include "Grid.h"
 #include "Particle.h"
 #include <string>
@@ -30,6 +30,7 @@ private:
 	void InitMapWithParticles(vector<Particle *> particles);
 	void ColorPixelByRoute(int currentCellValue, int i, int j);
 	void ColorPixelByParticles(int currentCellValue, int i, int j);
+
 public:
 	DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints);
 	void PrintRouteCvMat();

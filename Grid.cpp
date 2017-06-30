@@ -1,8 +1,7 @@
 #include "Grid.h"
 
-using namespace std;
-Grid::Grid(){
-
+Grid::Grid()
+{
 }
 
 Grid::Grid(vector< vector<bool> > grid, double mapResolution,
@@ -17,30 +16,37 @@ Grid::Grid(vector< vector<bool> > grid, double mapResolution,
 	this->goalLocation = goal;
 }
 
-int Grid::GetGridHeight() const {
+int Grid::GetGridHeight() const
+{
 	return gridHeight;
 }
 
-int Grid::GetGridWidth() const {
+int Grid::GetGridWidth() const
+{
 	return gridWidth;
 }
 
-vector< vector<bool> > Grid::GetOccupationMap() const {
+vector< vector<bool> > Grid::GetOccupationMap() const
+{
 	return grid;
 }
 
-double Grid::GetMapResolution() const {
+double Grid::GetMapResolution() const
+{
 	return mapResolution;
 }
 
-Location Grid::GetGridStartLocation() const {
+Location Grid::GetGridStartLocation() const
+{
 	return startLocation;
 }
 
-Location Grid::GetGridGoalLocation() const {
+Location Grid::GetGridGoalLocation() const
+{
 	return goalLocation;
 }
 
-Grid::~Grid() {
+Grid::~Grid()
+{
 	// TODO Auto-generated destructor stub
 }

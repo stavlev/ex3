@@ -8,12 +8,10 @@
 #ifndef MOVEMENTMANAGER_H_
 #define MOVEMENTMANAGER_H_
 
-#include "Globals.h"
+#include "Location.h"
 #include "Robot.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 #include "HamsterAPIClientCPP/Hamster.h"
+#include <vector>
 using namespace std;
 using namespace HamsterAPI;
 
@@ -26,7 +24,7 @@ public:
 	double * deltaX, * deltaY, * deltaYaw, * yaw;
 	MovementManager(HamsterAPI::Hamster * hamster);
 	void MoveTo(Robot * robot, Location currLocation, Location * destination);
-	void GetScansBetween(double min, double max, std::vector<double> & distances);
+	void GetScansBetween(double min, double max, vector<double> & distances);
 	void MoveForward();
 	void TurnLeft() ;
 	void TurnRight();

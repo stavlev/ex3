@@ -4,7 +4,12 @@
  *  Created on: Jun 28, 2017
  *      Author: user
  */
+
 #include "MovementManager.h"
+#include "Globals.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define SPAN 100
 

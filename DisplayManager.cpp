@@ -1,4 +1,17 @@
 #include "DisplayManager.h"
+#include "Globals.h"
+
+#define FREE_SPACE 0
+#define OBSTACLE 1
+#define START 2
+#define ROUTE 3
+#define PARTICLE 3
+#define GOAL 4
+#define TOP_PARTICLE 4
+#define WAYPOINT 5
+
+#define TOP_PARTICLES_NUM 5
+#define BELIEF_LEVEL 0.5
 
 DisplayManager::DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints)
 {

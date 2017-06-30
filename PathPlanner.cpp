@@ -1,4 +1,5 @@
 #include "PathPlanner.h"
+#include "Globals.h"
 
 PathPlanner::PathPlanner(const Grid * grid)
 {

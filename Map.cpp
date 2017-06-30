@@ -1,6 +1,11 @@
 #include "Map.h"
 
-Map::Map(){
+#define WHITE_COLOR 255;
+#define GRAY_COLOR 128;
+#define BLACK_COLOR 0;
+
+Map::Map()
+{
 }
 
 Map::Map(HamsterAPI::OccupancyGrid * map, int robotSizeInCm,

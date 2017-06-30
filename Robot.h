@@ -8,7 +8,7 @@
 #ifndef ROBOT_H_
 #define ROBOT_H_
 
-#include "Globals.h"
+#include "Location.h"
 #include <HamsterAPIClientCPP/Hamster.h>
 using namespace HamsterAPI;
 

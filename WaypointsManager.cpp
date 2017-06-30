@@ -1,4 +1,9 @@
 #include "WaypointsManager.h"
+#include "Globals.h"
+
+#define NUMBER_OF_PARTICLES 1000
+#define MAX_NUM_OF_WAYPOINTS 100
+#define MAX_DISTANCE_BETWEEN_WAYPOINTS 4
 
 int WayPointsManager::CalculateWaypoints(string plannedRoute, Location startLocation, Location goalLocation)
 {

@@ -6,6 +6,8 @@
  */
 
 #include "Node.h"
+#include <math.h>
+using namespace std;
 
 Node::Node()
 {

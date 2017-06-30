@@ -1,7 +1,7 @@
 #ifndef GRID_H_
 #define GRID_H_
 
-#include "Globals.h"
+#include "Location.h"
 #include <vector>
 using namespace std;
 

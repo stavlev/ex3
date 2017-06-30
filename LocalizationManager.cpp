@@ -2,7 +2,6 @@
 #include "math.h"
 #include <iostream>
 #include <algorithm>
-using namespace std;
 
 #define NUM_OF_PARTICLES 350
 #define BAD_BELIEF_PARTICLES 80

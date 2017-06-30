@@ -6,6 +6,7 @@
 #include "Robot.h"
 #include "LocalizationManager.h"
 #include "MovementManager.h"
+#include "Globals.h"
 
 int main()
 {
@@ -46,7 +47,7 @@ int main()
 		{
 			try
 			{
-				Location currWaypoint = waypoints.at(waypointIndex);
+				/*Location currWaypoint = waypoints.at(waypointIndex);
 				Location currRobotLocation = robot.GetCurrentLocation();
 
 				double robotDistanceFromWaypoint =
@@ -70,7 +71,7 @@ int main()
 				if (count % 100 == 0)
 				{
 					deltaX = deltaY = deltaYaw = yaw = 0 ;
-				}
+				}*/
 
 				cout << "Real values:" <<
 						" deltaX : " << robot.GetDeltaX() <<

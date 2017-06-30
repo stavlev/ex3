@@ -8,7 +8,7 @@
 #ifndef WAYPOINTSMANAGER_H_
 #define WAYPOINTSMANAGER_H_
 
-#include "Globals.h"
+#include "Location.h"
 #include <string>
 #include <vector>
 using namespace std;
