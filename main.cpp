@@ -3,9 +3,9 @@
 #include "Map.h"
 #include "WaypointsManager.h"
 #include "DisplayManager.h"
-#include "Robot.h"
-#include "LocalizationManager.h"
 #include "MovementManager.h"
+#include "LocalizationManager.h"
+#include "Robot.h"
 #include "Globals.h"
 
 int main()
@@ -22,8 +22,9 @@ int main()
 		Map map = Map(&occupancyGrid, ROBOT_SIZE_IN_CM, startLocation, goalLocation);
 		Grid grid = map.grid;
 
-		Robot robot(hamster);
 		LocalizationManager localizationManager(occupancyGrid, hamster);
+		Robot robot(hamster, &localizationManager);
+		robot.SetStartLocation(startLocation);
 
 		PathPlanner pathPlanner = PathPlanner(&grid);
 		string plannedRoute = pathPlanner.plannedRoute;
@@ -38,7 +39,6 @@ int main()
 		displayManager.PrintRouteCvMat();
 
 		MovementManager movementManager(hamster);
-		localizationManager.InitParticles();
 
 		int count = 0, waypointIndex = 0;
 		double deltaX = 0,deltaY = 0, deltaYaw = 0, yaw = 0;
@@ -79,9 +79,9 @@ int main()
 						" deltaY: " << robot.GetDeltaY() <<
 						" deltaYaw : " << robot.GetDeltaYaw() << endl;
 
-				localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);//robot.getDeltaX(), robot.getDeltaY(), robot.getDeltaYaw());
-				displayManager.PrintRouteCvMat(localizationManager.GetParticles());
-				localizationManager.PrintParticles();
+				//localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);//robot.getDeltaX(), robot.getDeltaY(), robot.getDeltaYaw());
+				displayManager.PrintRouteCvMat(robot.GetParticles());
+				//localizationManager.PrintParticles();
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{

@@ -36,6 +36,7 @@ public:
 	void UpdateParticles(double deltaX, double deltaY, double deltaYaw);
 	void PrintParticles() const;
 	vector<Particle *> GetParticles() const;
+	Particle GetHighestBeliefParticle();
 	virtual ~LocalizationManager();
 };
 

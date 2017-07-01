@@ -8,6 +8,8 @@
 #ifndef GLOBALS_H_
 #define GLOBALS_H_
 
+#include <unistd.h>
+
 #define ROBOT_SIZE_IN_CM 10
 
 #define X_START 400

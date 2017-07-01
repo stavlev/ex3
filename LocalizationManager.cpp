@@ -91,13 +91,14 @@ void LocalizationManager::InitParticles()
 
 	for (size_t i = 0; i < particles.size(); i++)
 	{
-		particles[i] = new Particle();
-		GetRandomLocation(particles[i]);
+		particles.at(i) = new Particle();
+		GetRandomLocation(particles.at(i));
 	}
 }
 
 double LocalizationManager::ComputeBelief(Particle * particle)
 {
+	sleep(1);
 	LidarScan lidarScan = hamster->getLidarScan();
 
 	int hits = 0;
@@ -171,7 +172,7 @@ void LocalizationManager::UpdateParticles(double deltaX, double deltaY, double d
 
 	for (size_t i = 0; i < particles.size(); i++)
 	{
-		Particle * currParticle = particles[i];
+		Particle * currParticle = particles.at(i);
 
 		double r = sqrt(deltaX * deltaX + deltaY * deltaY);
 		currParticle->x += r * cos(currParticle->yaw * DEG2RAD);
@@ -200,9 +201,9 @@ void LocalizationManager::UpdateParticles(double deltaX, double deltaY, double d
 
 			if (!isSuccessfullyInserted)
 			{
-				if (particles[indexFromTop]->belief > 0.4)
+				if (particles.at(indexFromTop)->belief > 0.4)
 				{	// The particle had a low belief which is insufficient in order to get it in - therefore randomize a new particle
-					GetRandomLocationNextTo(currParticle, particles[indexFromTop]);
+					GetRandomLocationNextTo(currParticle, particles.at(indexFromTop));
 				}
 				else
 				{	// No high belief particles exist so we randomize in any free slot
@@ -219,15 +220,15 @@ void LocalizationManager::UpdateParticles(double deltaX, double deltaY, double d
 
 	for (int i = 1; i <= BAD_BELIEF_PARTICLES; i++)
 	{
-		if (particles[size - i]->belief > 0.3)
+		if (particles.at(size - i)->belief > 0.3)
 		{
-			GetRandomLocationNextTo(particles[i - 1], particles[size - i]);
-			ComputeBelief(particles[i - 1]);
+			GetRandomLocationNextTo(particles.at(i - 1), particles.at(size - i));
+			ComputeBelief(particles.at(i - 1));
 		}
 		else
 		{
-			GetRandomLocation(particles[i - 1]);
-			ComputeBelief(particles[i - 1]);
+			GetRandomLocation(particles.at(i - 1));
+			ComputeBelief(particles.at(i - 1));
 		}
 	}
 }
@@ -236,7 +237,7 @@ void LocalizationManager::PrintParticles() const
 {
 	for (size_t i = 0; i < particles.size(); i++)
 	{
-		Particle * currParticle = particles[i];
+		Particle * currParticle = particles.at(i);
 
 		cout << "Particle " << i << ": " <<
 				currParticle->x << "," <<
@@ -249,6 +250,13 @@ void LocalizationManager::PrintParticles() const
 vector<Particle *> LocalizationManager::GetParticles() const
 {
 	return particles;
+}
+
+Particle LocalizationManager::GetHighestBeliefParticle()
+{
+	Particle topParticle = **(std::max_element(particles.begin(), particles.end(), Compare));
+
+	return topParticle;
 }
 
 LocalizationManager::~LocalizationManager() {
