@@ -22,8 +22,9 @@ int main()
 		Map map = Map(&occupancyGrid, ROBOT_SIZE_IN_CM, startLocation, goalLocation);
 		Grid grid = map.grid;
 
-		LocalizationManager localizationManager(occupancyGrid, hamster);
-		Robot robot(hamster, &localizationManager);
+		LocalizationManager localizationManager(hamster, map);
+		Robot robot(&localizationManager);
+
 		robot.SetStartLocation(startLocation);
 
 		PathPlanner pathPlanner = PathPlanner(&grid);

@@ -8,20 +8,18 @@
     Robot.h
     Purpose: This class uses to calculate the "delta" in the movement
     	     of the Hamster robot.
-    	     Its main function of this class- updatePose should be called
+    	     Its main function of this class- UpdateLocation should be called
     	     every time the Hamster moves.
 */
 class Robot
 {
 private:
-	double currX, currY, currYaw;
-	double prevX, prevY, prevYaw;
-	Hamster * hamster;
 	LocalizationManager * localizationManager;
+	double currX, currY, currYaw, prevX, prevY, prevYaw;
 
 public:
-	Robot(Hamster * hamster, LocalizationManager * localizationManager);
-	void SetStartLocation(const Location initialLocation);
+	Robot(LocalizationManager * localizationManager);
+	void SetStartLocation(const Location startLocation);
 	double GetDeltaX() const;
 	double GetDeltaY() const;
 	double GetDeltaYaw() const;

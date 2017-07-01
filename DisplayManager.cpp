@@ -155,7 +155,7 @@ void DisplayManager::InitMapWithParticles(vector<Particle *> particles)
 
 	for (int i = 0; i < particles.size(); i++)
 	{
-		Particle * currParticle = particles[i];
+		Particle * currParticle = particles.at[i];
 		bool isTopParticle = i >= particles.size() - TOP_PARTICLES_NUM;
 
 		bool isTopBeliefParticle = isTopParticle /*&& currParticle->belief > BELIEF_LEVEL*/;

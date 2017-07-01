@@ -7,23 +7,19 @@
 
 #include "Robot.h"
 
-Robot::Robot(Hamster * hamster, LocalizationManager * localizationManager) :
-	hamster(hamster), localizationManager(localizationManager),
-	prevX(0), prevY(0), prevYaw(0), currX(0), currY(0), currYaw(0)
+Robot::Robot(LocalizationManager * localizationManager) :
+	localizationManager(localizationManager),
+	currX(0), currY(0), currYaw(0), prevX(0), prevY(0), prevYaw(0)
 {
 }
 
-void Robot::SetStartLocation(const Location initialLocation)
+void Robot::SetStartLocation(const Location startLocation)
 {
-	currX = initialLocation.x;
-	currY = initialLocation.y;
-	currYaw = initialLocation.yaw;
+	currX = startLocation.x;
+	currY = startLocation.y;
+	currYaw = startLocation.yaw;
 
-	Pose initialPose(initialLocation.x, initialLocation.y, initialLocation.yaw);
-	sleep(5);
-	hamster->setInitialPose(initialPose);
-
-	localizationManager->InitParticles();
+	localizationManager->InitParticles(startLocation);
 	UpdateLocation();
 }
 
@@ -65,7 +61,11 @@ void Robot::UpdateLocation()
 	currY = topParticle.y;
 	currYaw = topParticle.yaw;
 
-	localizationManager->UpdateParticles(GetDeltaX(), GetDeltaY(), GetDeltaYaw());
+	double deltaX = GetDeltaX();
+	double deltaY = GetDeltaY();
+	double deltaYaw = GetDeltaYaw();
+
+	localizationManager->UpdateParticles(deltaX, deltaY, deltaYaw);
 }
 
 vector<Particle *> Robot::GetParticles() const
