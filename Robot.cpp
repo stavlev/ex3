@@ -9,12 +9,6 @@
 
 Robot::Robot(Hamster * hamster) : hamster(hamster), prevX(0), prevY(0), prevYaw(0), currX(0), currY(0), currYaw(0)
 {
-}
-
-void Robot::SetStartLocation(const Location startLocation)
-{
-	Pose initialPose = Pose(startLocation.x, startLocation.y, startLocation.yaw);
-	hamster->setInitialPose(initialPose);
 	UpdatePose();
 }
 

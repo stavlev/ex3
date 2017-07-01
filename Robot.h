@@ -28,7 +28,6 @@ private:
 
 public:
 	Robot(Hamster *hamster);
-	void SetStartLocation(const Location startLocation);
 	double GetDeltaX() const;
 	double GetDeltaY() const;
 	double GetDeltaYaw() const;

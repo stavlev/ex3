@@ -8,16 +8,12 @@
 #include "MovementManager.h"
 #include "Globals.h"
 
-void MoveToWaypoint(
-		const vector<Location> * waypoints, int * currWaypointIndex,
-		Robot * robot, MovementManager * movementManager);
-
 int main()
 {
 	try
 	{
 		Hamster* hamster = new HamsterAPI::Hamster(1);
-		sleep(3);	// Wait a few seconds until the robot is ready
+		sleep(3);
 		OccupancyGrid occupancyGrid = hamster->getSLAMMap();
 
 		Location startLocation = { .x = X_START, .y = Y_START, .yaw = YAW_START };
@@ -27,8 +23,6 @@ int main()
 		Grid grid = map.grid;
 
 		Robot robot(hamster);
-		robot.SetStartLocation(startLocation);
-
 		LocalizationManager localizationManager(occupancyGrid, hamster);
 
 		PathPlanner pathPlanner = PathPlanner(&grid);
@@ -46,14 +40,39 @@ int main()
 		MovementManager movementManager(hamster);
 		localizationManager.InitParticles();
 
-		int currWaypointIndex = 0;
-		double deltaX = 0, deltaY = 0, deltaYaw = 0, yaw = 0;
+		int count = 0, waypointIndex = 0;
+		double deltaX = 0,deltaY = 0, deltaYaw = 0, yaw = 0;
 
-		while (hamster->isConnected() && currWaypointIndex < numOfWaypoints)
+		while (hamster->isConnected() && waypointIndex < numOfWaypoints)
 		{
 			try
 			{
-				//MoveToWaypoint(&waypoints, &currWaypointIndex, &robot, &movementManager);
+				/*Location currWaypoint = waypoints.at(waypointIndex);
+				Location currRobotLocation = robot.GetCurrentLocation();
+
+				double robotDistanceFromWaypoint =
+						sqrt(pow(currWaypoint.x - currRobotLocation.x, 2) +
+							 pow(currWaypoint.y - currRobotLocation.y, 2));
+
+				bool isWaypointReached = robotDistanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
+
+				if (isWaypointReached)
+				{
+					waypointIndex++;
+				}
+				else
+				{
+					movementManager.MoveTo(&robot, currRobotLocation, &currWaypoint);
+				}
+
+				usleep(444);
+
+				robot.UpdatePose();
+
+				if (count % 100 == 0)
+				{
+					deltaX = deltaY = deltaYaw = yaw = 0 ;
+				}*/
 
 				cout << "Real values:" <<
 						" deltaX : " << robot.GetDeltaX() <<
@@ -76,31 +95,4 @@ int main()
 	}
 
 	return 0;
-}
-
-void MoveToWaypoint(
-		const vector<Location> * waypoints, int * currWaypointIndex,
-		Robot * robot, MovementManager * movementManager)
-{
-	Location currWaypoint = waypoints->at(*currWaypointIndex);
-	Location currRobotLocation = robot->GetCurrentLocation();
-
-	double robotDistanceFromWaypoint =
-			sqrt(pow(currWaypoint.x - currRobotLocation.x, 2) +
-				 pow(currWaypoint.y - currRobotLocation.y, 2));
-
-	bool isWaypointReached = robotDistanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
-
-	if (isWaypointReached)
-	{
-		(*currWaypointIndex)++;
-	}
-	else
-	{
-		movementManager->MoveTo(robot, currRobotLocation, &currWaypoint);
-	}
-
-	usleep(444);
-
-	robot->UpdatePose();
 }
