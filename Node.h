@@ -1,8 +1,8 @@
 /*
  * Node.h
  *
- *  Created on: Jun 24, 2017
- *      Author: root
+ *  Created on: Jul 1, 2017
+ *      Author: user
  */
 
 #ifndef NODE_H_
@@ -30,5 +30,6 @@ public:
 	const int & GetHeuristicEstimate(const int & xDest, const int & yDest) const;
 	virtual ~Node();
 };
+
 
 #endif /* NODE_H_ */

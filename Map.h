@@ -1,3 +1,10 @@
+/*
+ * Map.h
+ *
+ *  Created on: Jul 1, 2017
+ *      Author: user
+ */
+
 #ifndef MAP_H_
 #define MAP_H_
 
@@ -11,8 +18,11 @@ class Map
 {
 private:
 	OccupancyGrid map;
+	double mapResolutionInCm;	/* Each OccupancyGrid cell takes an area of mapResolutionInCm^2 centimeters */
 	cv::Mat originalCvMat;
 	cv::Mat inflatedCvMat;
+	int mapWidth;
+	int mapHeight;
 	int inflationRadius;
 	int robotSizeInCm;
 	Location startLocation;
@@ -24,10 +34,6 @@ private:
 
 public:
 	vector< vector<bool> > occupationMap;
-	int mapWidth;
-	int mapHeight;
-	double mapResolution;
-	double mapResolutionInCm;	/* Each OccupancyGrid cell takes an area of mapResolutionInCm^2 centimeters */
 	Grid grid;
 	Map();
 	Map(HamsterAPI::OccupancyGrid * map, int robotSizeInCm, Location startLocation, Location goalLocation);

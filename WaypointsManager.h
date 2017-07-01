@@ -1,7 +1,7 @@
 /*
  * WaypointsManager.h
  *
- *  Created on: Jun 27, 2017
+ *  Created on: Jul 1, 2017
  *      Author: user
  */
 

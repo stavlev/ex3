@@ -1,14 +1,12 @@
 /*
  * Globals.h
  *
- *  Created on: Jun 27, 2017
+ *  Created on: Jul 1, 2017
  *      Author: user
  */
 
 #ifndef GLOBALS_H_
 #define GLOBALS_H_
-
-#include <unistd.h>
 
 #define ROBOT_SIZE_IN_CM 10
 

@@ -1,8 +1,17 @@
+/*
+ * Robot.h
+ *
+ *  Created on: Jul 1, 2017
+ *      Author: user
+ */
+
 #ifndef ROBOT_H_
 #define ROBOT_H_
 
 #include "Location.h"
 #include "LocalizationManager.h"
+#include <HamsterAPIClientCPP/Hamster.h>
+using namespace HamsterAPI;
 
 /**
     Robot.h
@@ -14,18 +23,18 @@
 class Robot
 {
 private:
+	Hamster * hamster;
 	LocalizationManager * localizationManager;
-	double currX, currY, currYaw, prevX, prevY, prevYaw;
+	double prevX, prevY, prevYaw, currX, currY, currYaw;
 
 public:
-	Robot(LocalizationManager * localizationManager);
-	void SetStartLocation(const Location startLocation);
+	Robot(Hamster * hamster, LocalizationManager * localizationManager);
+	void Initialize(Location startLocation);
 	double GetDeltaX() const;
 	double GetDeltaY() const;
 	double GetDeltaYaw() const;
 	Location GetCurrentLocation();
 	void UpdateLocation();
-	vector<Particle *> GetParticles() const;
 	virtual ~Robot();
 };
 

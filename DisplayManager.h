@@ -1,3 +1,10 @@
+/*
+ * DisplayManager.h
+ *
+ *  Created on: Jul 1, 2017
+ *      Author: user
+ */
+
 #ifndef DISPLAYMANAGER_H_
 #define DISPLAYMANAGER_H_
 

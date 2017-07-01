@@ -3,16 +3,15 @@
 #include "Map.h"
 #include "WaypointsManager.h"
 #include "DisplayManager.h"
-#include "MovementManager.h"
-#include "LocalizationManager.h"
 #include "Robot.h"
+#include "MovementManager.h"
 #include "Globals.h"
 
 int main()
 {
 	try
 	{
-		Hamster* hamster = new HamsterAPI::Hamster(1);
+		Hamster * hamster = new HamsterAPI::Hamster(1);
 		sleep(3);
 		OccupancyGrid occupancyGrid = hamster->getSLAMMap();
 
@@ -22,10 +21,8 @@ int main()
 		Map map = Map(&occupancyGrid, ROBOT_SIZE_IN_CM, startLocation, goalLocation);
 		Grid grid = map.grid;
 
-		LocalizationManager localizationManager(hamster, map);
-		Robot robot(&localizationManager);
-
-		robot.SetStartLocation(startLocation);
+		LocalizationManager localizationManager(occupancyGrid, hamster);
+		Robot robot(hamster, &localizationManager);
 
 		PathPlanner pathPlanner = PathPlanner(&grid);
 		string plannedRoute = pathPlanner.plannedRoute;
@@ -41,8 +38,11 @@ int main()
 
 		MovementManager movementManager(hamster);
 
-		int count = 0, waypointIndex = 0;
-		double deltaX = 0,deltaY = 0, deltaYaw = 0, yaw = 0;
+		robot.Initialize(startLocation);
+		//localizationManager.InitParticles();
+
+		int waypointIndex = 0;
+		double deltaX = 0, deltaY = 0, deltaYaw = 0, yaw = 0;
 
 		while (hamster->isConnected() && waypointIndex < numOfWaypoints)
 		{
@@ -68,21 +68,16 @@ int main()
 
 				usleep(444);
 
-				robot.UpdatePose();
-
-				if (count % 100 == 0)
-				{
-					deltaX = deltaY = deltaYaw = yaw = 0 ;
-				}*/
+				robot.UpdateLocation();*/
 
 				cout << "Real values:" <<
 						" deltaX : " << robot.GetDeltaX() <<
 						" deltaY: " << robot.GetDeltaY() <<
 						" deltaYaw : " << robot.GetDeltaYaw() << endl;
 
-				//localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);//robot.getDeltaX(), robot.getDeltaY(), robot.getDeltaYaw());
-				displayManager.PrintRouteCvMat(robot.GetParticles());
-				//localizationManager.PrintParticles();
+				localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);//robot.getDeltaX(), robot.getDeltaY(), robot.getDeltaYaw());
+				displayManager.PrintRouteCvMat(localizationManager.GetParticles());
+				localizationManager.PrintParticles();
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{

@@ -1,7 +1,7 @@
 /*
  * LocalizationManager.h
  *
- *  Created on: Jun 27, 2017
+ *  Created on: Jul 1, 2017
  *      Author: user
  */
 
@@ -9,7 +9,10 @@
 #define LOCALIZATIONMANAGER_H_
 
 #include "Particle.h"
-#include "Map.h"
+#include <vector>
+#include <HamsterAPIClientCPP/Hamster.h>
+using namespace std;
+using namespace HamsterAPI;
 
 /**
     LocalizationManager.h
@@ -20,24 +23,20 @@ class LocalizationManager
 {
 private:
 	vector<Particle *> particles;
-	vector<vector<bool> > occupationMap;
-	int mapWidth;		// The OccupancyGrid width equal to ogrid.getWidth()
-	int mapHeight;		// The OccupancyGrid height equal to ogrid.getHeight()
-	int mapResolutionInCm;
+	const OccupancyGrid & ogrid;
 	Hamster * hamster;
-	void InitStartLocation(Location startLocation);
-	void UpdateWithRandomLocation(Particle * particleToUpdate);
-	void UpdateWithRandomLocationNextTo(Particle * particleToUpdate, Particle * betterParticle);
 	double ComputeBelief(Particle * particle);
 	bool InsertOutOfRangeParticle(Particle * particle);
+	void UpdateParticle(Particle * particleToUpdate);
+	void UpdateParticle(Particle * particleToUpdate, Particle * betterParticle);
 
 public:
-	LocalizationManager(Hamster * hamster, const Map map);
-	void InitParticles(Location startLocation);
+	LocalizationManager(const OccupancyGrid & ogrid, Hamster * hamster);
+	void InitParticles();
+	vector<Particle *> GetParticles() const;
+	Particle * GetTopParticle() const;
 	void UpdateParticles(double deltaX, double deltaY, double deltaYaw);
 	void PrintParticles() const;
-	vector<Particle *> GetParticles() const;
-	Particle GetHighestBeliefParticle();
 	virtual ~LocalizationManager();
 };
 

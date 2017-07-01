@@ -1,25 +1,33 @@
-/*
- * Robot.cpp
- *
- *  Created on: Jan 18, 2017
- *      Author: user
- */
-
 #include "Robot.h"
 
-Robot::Robot(LocalizationManager * localizationManager) :
-	localizationManager(localizationManager),
-	currX(0), currY(0), currYaw(0), prevX(0), prevY(0), prevYaw(0)
+Robot::Robot(Hamster * hamster, LocalizationManager * localizationManager)
 {
+	this->hamster = hamster;
+	this->localizationManager = localizationManager;
+
+	this->prevX = 0;
+	this->prevY = 0;
+	this->prevYaw = 0;
+	this->currX = 0;
+	this->currY = 0;
+	this->currYaw = 0;
 }
 
-void Robot::SetStartLocation(const Location startLocation)
+void Robot::Initialize(Location startLocation)
 {
 	currX = startLocation.x;
 	currY = startLocation.y;
 	currYaw = startLocation.yaw;
 
-	localizationManager->InitParticles(startLocation);
+	Pose initialPose;
+	initialPose.setX(startLocation.x);
+	initialPose.setY(startLocation.y);
+	initialPose.setHeading(startLocation.yaw);
+
+	sleep(3);
+	hamster->setInitialPose(initialPose);
+
+	localizationManager->InitParticles();
 	UpdateLocation();
 }
 
@@ -40,39 +48,26 @@ double Robot::GetDeltaYaw() const
 
 Location Robot::GetCurrentLocation()
 {
-	Particle topParticle = localizationManager->GetHighestBeliefParticle();
+	Particle * topParticle = localizationManager->GetTopParticle();
 
 	Location currLocation;
-	currLocation = { .x = topParticle.x, .y = topParticle.y, .yaw = topParticle.yaw };
+	currLocation = { .x = topParticle->x, .y = topParticle->y, .yaw = topParticle->yaw };
 
 	return currLocation;
 }
 
 void Robot::UpdateLocation()
 {
-	Particle topParticle = localizationManager->GetHighestBeliefParticle();
+	Particle * topParticle = localizationManager->GetTopParticle();
 
-	// Update the current and previous locations by the position of the robot
 	prevX = currX;
 	prevY = currY;
 	prevYaw = currYaw;
 
-	currX = topParticle.x;
-	currY = topParticle.y;
-	currYaw = topParticle.yaw;
-
-	double deltaX = GetDeltaX();
-	double deltaY = GetDeltaY();
-	double deltaYaw = GetDeltaYaw();
-
-	localizationManager->UpdateParticles(deltaX, deltaY, deltaYaw);
-}
-
-vector<Particle *> Robot::GetParticles() const
-{
-	vector<Particle *> particles = localizationManager->GetParticles();
-
-	return particles;
+	// Update the current and previous locations by the position of the robot
+	currX = topParticle->x;
+	currY = topParticle->y;
+	currYaw = topParticle->yaw;
 }
 
 Robot::~Robot() {

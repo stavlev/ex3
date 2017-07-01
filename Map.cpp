@@ -18,7 +18,6 @@ Map::Map(HamsterAPI::OccupancyGrid * map, int robotSizeInCm,
 
 	mapHeight = map->getHeight();
 	mapWidth = map->getWidth();
-	mapResolution = map->getResolution();
 
 	// Initialize the occupation map - a boolean matrix indicating for
 	// each cell whether or not it is occupied

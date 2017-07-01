@@ -1,10 +1,3 @@
-/*
- * Node.cpp
- *
- *  Created on: Jun 24, 2017
- *      Author: root
- */
-
 #include "Node.h"
 #include <math.h>
 using namespace std;
