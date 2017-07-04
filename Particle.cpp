@@ -12,9 +12,9 @@ Particle::Particle(double posX, double posY, double yaw)
 	this->yaw = yaw;
 }
 
-float Particle::GetBelief(vector <double> readings, vector <double> simulatedReadings, int readingsNumber)
+double Particle::GetBelief(vector <double> readings, vector <double> simulatedReadings, int readingsNumber)
 {
-	float accuracySum = 0;
+	double accuracySum = 0;
 
 	for (int readingIndex = 0; readingIndex < readingsNumber; readingIndex++)
 	{
@@ -26,7 +26,7 @@ float Particle::GetBelief(vector <double> readings, vector <double> simulatedRea
 		accuracySum += readingAccuracy;
 	}
 
-	float accuracyAvg = accuracySum / readingsNumber;
+	double accuracyAvg = accuracySum / readingsNumber;
 	return accuracyAvg;
 }
 

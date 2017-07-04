@@ -19,11 +19,12 @@ class MovementManager
 {
 private:
 	HamsterAPI::Hamster * hamster;
+	void Turn(float wheelsAngle, string direction);
 
 public:
-	double * deltaX, * deltaY, * deltaYaw, * yaw;
+	double deltaX, deltaY, deltaYaw, yaw;
 	MovementManager(HamsterAPI::Hamster * hamster);
-	void MoveTo(Robot * robot, Location currLocation, Location * destination);
+	void MoveTo(Robot * robot, Location * destination);
 	void MoveForward();
 	void TurnLeft() ;
 	void TurnRight();

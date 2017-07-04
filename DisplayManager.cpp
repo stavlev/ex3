@@ -295,5 +295,6 @@ void DisplayManager::ColorPixelByParticles(int currentCellValue, int i, int j)
 
 DisplayManager::~DisplayManager()
 {
-	// TODO Auto-generated destructor stub
+	cv::destroyWindow("OccupancyGrid-view-route");
+	cv::destroyWindow("OccupancyGrid-view-particles");
 }

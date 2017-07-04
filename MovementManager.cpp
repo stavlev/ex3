@@ -5,6 +5,9 @@
 #include <time.h>
 
 #define SPAN 100
+#define MOVE_SPEED 0.4
+#define TURN_SPEED 0.2
+#define TURN_ANGLE 45.0
 
 MovementManager::MovementManager(HamsterAPI::Hamster * hamster)
 {
@@ -24,63 +27,51 @@ void MovementManager::MoveForward()
 
 	for (int i = 0; i < 5000; i++)
 	{
-		hamster->sendSpeed(0.4, 0.0);
+		hamster->sendSpeed(MOVE_SPEED, 0.0);
 	}
 
 	double time = (clock() - start) / CLOCKS_PER_SEC;
 
-	time *= 0.4 ;
+	time *= 0.4;
 
-	*deltaYaw +=0.009 ;
-	*yaw += *deltaYaw;
-	*deltaX = time*sin(*yaw);
-	*deltaY = time*cos(*yaw);
+	deltaYaw += 0.009;
+	yaw += deltaYaw;
+	deltaX = time*sin(yaw);
+	deltaY = time*cos(yaw);
 
-	cout << "Relative values :" << "deltaX: " << *deltaX << " deltaY : " << *deltaY << " deltaYaw : " << *deltaYaw << endl ;
+	cout << "Relative values :" << "deltaX: " << deltaX << " deltaY : " << deltaY << " deltaYaw : " << deltaYaw << endl ;
 }
 
 void MovementManager::TurnLeft()
 {
-	HamsterAPI::Log::i("Client", "Turning Left");
-
-	clock_t start  = clock();
-
-	for (int i = 0; i < 5000; i++)
-	{
-		hamster->sendSpeed(0.2, 45.0);
-	}
-
-	double time = (clock() - start) / CLOCKS_PER_SEC;
-
-	time *= 0.2 ;
-	time *= 1.4 ;
-
-	*deltaYaw += 28 ;
-	*yaw += *deltaYaw;
-	*deltaX = time*sin(*yaw);
-	*deltaY = time*cos(*yaw);
+	Turn(TURN_ANGLE, "Left");
 }
 
 void MovementManager::TurnRight()
 {
-	HamsterAPI::Log::i("Client", "Turning Right");
+	Turn(-TURN_ANGLE, "Right");
+}
+
+void MovementManager::Turn(float wheelsAngle, string direction)
+{
+	HamsterAPI::Log::i("Client", "Turning " + direction);
 
 	clock_t start  = clock();
 
 	for (int i = 0; i < 5000; i++)
 	{
-		hamster->sendSpeed(0.2, -45.0);
+		hamster->sendSpeed(TURN_SPEED, wheelsAngle);
 	}
 
 	double time = (clock() - start) / CLOCKS_PER_SEC;
 
-	time *= 0.2 ;
-	time *= 1.4 ;
+	time *= 0.2;
+	time *= 1.4;
 
-	*deltaYaw += 28 ;
-	*yaw += *deltaYaw;
-	*deltaX = time*sin(*yaw);
-	*deltaY = time*cos(*yaw);
+	deltaYaw += 28;
+	yaw += deltaYaw;
+	deltaX = time*sin(yaw);
+	deltaY = time*cos(yaw);
 }
 
 void MovementManager::MoveBackwards()
@@ -89,13 +80,13 @@ void MovementManager::MoveBackwards()
 
 	for (int i = 0; i < 5000; i++)
 	{
-		hamster->sendSpeed(-0.4, 0.0);
+		hamster->sendSpeed(-MOVE_SPEED, 0.0);
 	}
 
-	*deltaYaw +=0.015;
-	*yaw += 0.015 ;
-	*deltaX += -0.2*sin(*yaw);
-	*deltaY += -0.2*cos(*yaw);
+	deltaYaw += 0.015;
+	yaw += 0.015;
+	deltaX += -0.2*sin(yaw);
+	deltaY += -0.2*cos(yaw);
 }
 
 void MovementManager::StopMoving()
@@ -103,10 +94,14 @@ void MovementManager::StopMoving()
 	hamster->sendSpeed(0.0, 0.0);
 }
 
-void MovementManager::MoveTo(Robot * robot, Location currLocation, Location * destination)
+void MovementManager::MoveTo(Robot * robot, Location * destination)
 {
+	Location currLocation = robot->GetCurrentLocation();
+
 	double deltaX = destination->x - currLocation.x;
 	double deltaY = destination->y - currLocation.y;
+	double currentYaw = currLocation.yaw;
+
 	double newYawInRad = atan2(deltaY, deltaX);
 	double newYaw = radiansToDegrees(newYawInRad);
 
@@ -115,7 +110,7 @@ void MovementManager::MoveTo(Robot * robot, Location currLocation, Location * de
 		newYaw += 360;
 	}
 
-	double currentYaw = currLocation.yaw;
+	// Keep turning while the robot's angle is different than the destination angle
 
 	while (abs(newYaw - currentYaw) > 1)
 	{
@@ -146,17 +141,7 @@ void MovementManager::MoveTo(Robot * robot, Location currLocation, Location * de
 		currentYaw = currLocation.yaw;
 	}
 
-	MoveForward();
-	currLocation = robot->GetCurrentLocation();
-	double distanceFromDestination = sqrt(pow(currLocation.x - destination->x, 2) + pow(currLocation.y - destination->y, 2));
-
-	while (distanceFromDestination > DISTANCE_FROM_WAYPOINT_TOLERANCE)
-	{
-		MoveForward();
-		currLocation = robot->GetCurrentLocation();
-		distanceFromDestination = sqrt(pow(currLocation.x - destination->x, 2) + pow(currLocation.y - destination->y, 2));
-	}
-
+	// Once the destination yaw is correct - keep moving forward in this direction
 	MoveForward();
 }
 

@@ -58,16 +58,16 @@ Location Robot::GetCurrentLocation()
 
 void Robot::UpdateLocation()
 {
-	Particle * topParticle = localizationManager->GetTopParticle();
+	Location currentLocation = GetCurrentLocation();
 
 	prevX = currX;
 	prevY = currY;
 	prevYaw = currYaw;
 
 	// Update the current and previous locations by the position of the robot
-	currX = topParticle->x;
-	currY = topParticle->y;
-	currYaw = topParticle->yaw;
+	currX = currentLocation.x;
+	currY = currentLocation.y;
+	currYaw = currentLocation.yaw;
 }
 
 Robot::~Robot() {

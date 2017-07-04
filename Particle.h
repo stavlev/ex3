@@ -24,11 +24,10 @@ class Particle
 {
 public:
 	int i, j;
-	double x, y, yaw;
-	float belief;
+	double x, y, yaw, belief;
 	Particle();
 	Particle(double posX, double posY, double yaw);
-	float GetBelief(vector <double> readings, vector <double> simulatedReadings, int readingsNumber);
+	double GetBelief(vector <double> readings, vector <double> simulatedReadings, int readingsNumber);
 	void Move(double deltaDetination);
 	Location GetLocation();
 	~Particle();

@@ -27,7 +27,9 @@ private:
 	int ogridHeight, ogridWidth;
 	double ogridResolution;
 	Hamster * hamster;
-	float ComputeBelief(Particle * particle);
+	void ConvertFromMapLocationToIndex(Particle * particle);
+	void ConvertFromIndexToLocationOnMap(Particle * particle);
+	double ComputeBelief(Particle * particle);
 	bool InsertOutOfRangeParticle(Particle * particle);
 	void UpdateParticle(Particle * particleToUpdate);
 	void UpdateParticle(Particle * particleToUpdate, Particle * betterParticle);

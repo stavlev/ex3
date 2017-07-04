@@ -10,11 +10,11 @@
 
 #define ROBOT_SIZE_IN_CM 20
 
-#define X_START 400
-#define Y_START 500
-#define YAW_START 15
-#define X_GOAL 455
-#define Y_GOAL 365
+#define X_START 470
+#define Y_START 470
+#define YAW_START 120
+#define X_GOAL 655
+#define Y_GOAL 370
 
 #define DISTANCE_FROM_WAYPOINT_TOLERANCE 10
 
