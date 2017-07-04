@@ -10,9 +10,9 @@
 
 struct Location
 {
-	int x;
-	int y;
-	int yaw;
+	double x;
+	double y;
+	double yaw;
 };
 
 #endif /* LOCATION_H_ */

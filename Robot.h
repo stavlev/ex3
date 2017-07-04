@@ -26,9 +26,10 @@ private:
 	Hamster * hamster;
 	LocalizationManager * localizationManager;
 	double prevX, prevY, prevYaw, currX, currY, currYaw;
+	int inflationRadius;
 
 public:
-	Robot(Hamster * hamster, LocalizationManager * localizationManager);
+	Robot(Hamster * hamster, LocalizationManager * localizationManager, int inflationRadius);
 	void Initialize(Location startLocation);
 	double GetDeltaX() const;
 	double GetDeltaY() const;

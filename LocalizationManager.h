@@ -29,7 +29,7 @@ private:
 	Hamster * hamster;
 	void ConvertFromMapLocationToIndex(Particle * particle);
 	void ConvertFromIndexToLocationOnMap(Particle * particle);
-	double ComputeBelief(Particle * particle);
+	float ComputeBelief(Particle * particle);
 	bool InsertOutOfRangeParticle(Particle * particle);
 	void UpdateParticle(Particle * particleToUpdate);
 	void UpdateParticle(Particle * particleToUpdate, Particle * betterParticle);

@@ -1,9 +1,10 @@
 #include "Robot.h"
 
-Robot::Robot(Hamster * hamster, LocalizationManager * localizationManager)
+Robot::Robot(Hamster * hamster, LocalizationManager * localizationManager, int inflationRadius)
 {
 	this->hamster = hamster;
 	this->localizationManager = localizationManager;
+	this->inflationRadius = inflationRadius;
 
 	this->prevX = 0;
 	this->prevY = 0;
@@ -51,7 +52,11 @@ Location Robot::GetCurrentLocation()
 	Particle * topParticle = localizationManager->GetTopParticle();
 
 	Location currLocation;
-	currLocation = { .x = topParticle->x, .y = topParticle->y, .yaw = topParticle->yaw };
+	currLocation = {
+			.x = topParticle->x + 2*inflationRadius,
+			.y = topParticle->y + 2*inflationRadius,
+			.yaw = topParticle->yaw
+	};
 
 	return currLocation;
 }

@@ -50,15 +50,19 @@ void LocalizationManager::ConvertFromMapLocationToIndex(Particle * particle)
 {
 	particle->i = (double) ogridHeight / 2 - particle->y / ogridResolution;
 	particle->j = particle->x / ogridResolution + (double) ogridWidth / 2;
+	/*currParticle->i = currParticle->y * ogridResolution + (double)ogridHeight / 2;
+	currParticle->j = currParticle->x * ogridResolution + (double)ogridWidth / 2;*/
 }
 
 void LocalizationManager::ConvertFromIndexToLocationOnMap(Particle * particle)
 {
 	particle->x = (particle->j - (double) ogridWidth / 2) * ogridResolution;
 	particle->y = ((double) ogridHeight / 2 - particle->i) * ogridResolution;
+	/*particle->x = (2 * particle->j - (double) ogridWidth) / ogridResolution;
+	particle->y = (2 * particle->i - (double) ogridHeight) / ogridResolution;*/
 }
 
-double LocalizationManager::ComputeBelief(Particle * particle)
+float LocalizationManager::ComputeBelief(Particle * particle)
 {
 	LidarScan lidarScan = hamster->getLidarScan();
 
@@ -113,6 +117,7 @@ bool LocalizationManager::InsertOutOfRangeParticle(Particle * particle)
 		count++;
 	} while (ogrid.getCell(particle->i, particle->j) != CELL_FREE && count < GET_BACK_TIMES);
 
+	// Convert indices to location on map
 	ConvertFromIndexToLocationOnMap(particle);
 
 	delete copyParticle;
@@ -227,18 +232,18 @@ void LocalizationManager::UpdateParticle(Particle * particleToUpdate, Particle *
 	{
 		if (betterParticle->belief < 0.3)
 		{
-			particleToUpdate->x = betterParticle->x+ 0.4-0.8*(double)rand()/(double)RAND_MAX;
-			particleToUpdate->y = betterParticle->y + 0.4-0.8*(double)rand()/(double)RAND_MAX;
+			particleToUpdate->x = betterParticle->x + 0.4 - 0.8*(double)rand()/(double)RAND_MAX;
+			particleToUpdate->y = betterParticle->y + 0.4 - 0.8*(double)rand()/(double)RAND_MAX;
 		}
 		else if (betterParticle->belief < 0.6)
 		{
-			particleToUpdate->x = betterParticle->x+ 0.2-0.4*(double)rand()/(double)RAND_MAX;
-			particleToUpdate->y = betterParticle->y+ 0.2-0.4*(double)rand()/(double)RAND_MAX;
+			particleToUpdate->x = betterParticle->x + 0.2 - 0.4*(double)rand()/(double)RAND_MAX;
+			particleToUpdate->y = betterParticle->y + 0.2 - 0.4*(double)rand()/(double)RAND_MAX;
 		}
 		else
 		{
-			particleToUpdate->x = betterParticle->x+ 0.1-0.2*(double)rand()/(double)RAND_MAX;
-			particleToUpdate->y = betterParticle->y+ 0.1-0.2*(double)rand()/(double)RAND_MAX;
+			particleToUpdate->x = betterParticle->x + 0.1 - 0.2*(double)rand()/(double)RAND_MAX;
+			particleToUpdate->y = betterParticle->y + 0.1 - 0.2*(double)rand()/(double)RAND_MAX;
 		}
 
 		ConvertFromMapLocationToIndex(particleToUpdate);

@@ -23,7 +23,6 @@ private:
 	cv::Mat inflatedCvMat;
 	int mapWidth;
 	int mapHeight;
-	int inflationRadius;
 	int robotSizeInCm;
 	Location startLocation;
 	Location goalLocation;
@@ -35,6 +34,7 @@ private:
 public:
 	vector< vector<bool> > occupationMap;
 	Grid grid;
+	int inflationRadius;
 	Map();
 	Map(HamsterAPI::OccupancyGrid * map, int robotSizeInCm, Location startLocation, Location goalLocation);
 	virtual ~Map();
