@@ -24,7 +24,6 @@ public:
 	double * deltaX, * deltaY, * deltaYaw, * yaw;
 	MovementManager(HamsterAPI::Hamster * hamster);
 	void MoveTo(Robot * robot, Location currLocation, Location * destination);
-	void GetScansBetween(double min, double max, vector<double> & distances);
 	void MoveForward();
 	void TurnLeft() ;
 	void TurnRight();

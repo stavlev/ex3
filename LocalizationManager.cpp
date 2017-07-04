@@ -12,6 +12,9 @@
 LocalizationManager::LocalizationManager(const OccupancyGrid & ogrid, Hamster * hamster) :
 	ogrid(ogrid), hamster(hamster)
 {
+	ogridHeight = ogrid.getHeight();
+	ogridWidth = ogrid.getWidth();
+	ogridResolution = ogrid.getResolution();
 }
 
 void LocalizationManager::InitParticles()
@@ -43,7 +46,7 @@ Particle * LocalizationManager::GetTopParticle() const
 	return topParticle;
 }
 
-double LocalizationManager::ComputeBelief(Particle * particle)
+float LocalizationManager::ComputeBelief(Particle * particle)
 {
 	LidarScan lidarScan = hamster->getLidarScan();
 
@@ -60,8 +63,8 @@ double LocalizationManager::ComputeBelief(Particle * particle)
 			double obsX = particle->x + lidarScan.getDistance(i) * cos(angle + particle->yaw * DEG2RAD- 180 * DEG2RAD);
 			double obsY = particle->y + lidarScan.getDistance(i) * sin(angle + particle->yaw * DEG2RAD- 180 * DEG2RAD);
 
-			int i = (double) ogrid.getHeight() / 2 - obsY / ogrid.getResolution();
-			int j = obsX / ogrid.getResolution() + ogrid.getWidth() / 2;
+			int i = (double) ogridHeight / 2 - obsY / ogridResolution;
+			int j = obsX / ogridResolution + ogridWidth / 2;
 
 			// Determine if there was a hit according to the grid
 			if (ogrid.getCell(i, j) == CELL_OCCUPIED)
@@ -98,8 +101,8 @@ bool LocalizationManager::InsertOutOfRangeParticle(Particle * particle)
 		count++;
 	} while (ogrid.getCell(particle->i, particle->j) != CELL_FREE && count < GET_BACK_TIMES);
 
-	particle->x = (particle->j - (double) ogrid.getWidth() / 2) * ogrid.getResolution();
-	particle->y = ((double) ogrid.getHeight() / 2 - particle->i) * ogrid.getResolution();
+	particle->x = (particle->j - (double) ogridWidth / 2) * ogridResolution;
+	particle->y = ((double) ogridHeight / 2 - particle->i) * ogridResolution;
 
 	delete copyParticle;
 
@@ -123,8 +126,12 @@ void LocalizationManager::UpdateParticles(double deltaX, double deltaY, double d
 		currParticle->yaw = (currParticle->yaw >= 360) ? currParticle->yaw - 360 : currParticle->yaw;
 		currParticle->yaw = (currParticle->yaw < 0) ? currParticle->yaw + 360 : currParticle->yaw;
 
-		currParticle->i = (double) ogrid.getHeight() / 2 - currParticle->y / ogrid.getResolution();
-		currParticle->j = currParticle->x / ogrid.getResolution() + ogrid.getWidth() / 2;
+		// Convert location on map to indices
+		/*currParticle->i = (double) ogridHeight / 2 - currParticle->y / ogridResolution;
+		currParticle->j = currParticle->x / ogridResolution + ogridWidth / 2;*/
+
+		currParticle->i = currParticle->y / ogridResolution + (double)ogridHeight / 2;
+		currParticle->j = currParticle->x / ogridResolution + (double)ogridWidth / 2;
 
 		bool isSuccessfullyInserted = false;
 
@@ -197,14 +204,16 @@ void LocalizationManager::UpdateParticle(Particle * particleToUpdate)
 	// Keep randomize until it is in
 	do
 	{
-		particleToUpdate->j = rand() % ogrid.getWidth();
-		particleToUpdate->i = rand() % ogrid.getHeight();
+		particleToUpdate->j = rand() % ogridWidth;
+		particleToUpdate->i = rand() % ogridHeight;
 
 	} while (ogrid.getCell(particleToUpdate->i, particleToUpdate->j) != CELL_FREE);
 
-	// Convert to indices
-	particleToUpdate->x = (particleToUpdate->j - (double) ogrid.getWidth() / 2) * ogrid.getResolution();
-	particleToUpdate->y = ((double) ogrid.getHeight() / 2 - particleToUpdate->i) * ogrid.getResolution();
+	// Convert indices to location on map
+	/*particleToUpdate->x = (particleToUpdate->j - (double) ogrid.getWidth() / 2) * ogrid.getResolution();
+	particleToUpdate->y = ((double) ogrid.getHeight() / 2 - particleToUpdate->i) * ogrid.getResolution();*/
+	particleToUpdate->x = (2 * particleToUpdate->j - (double)ogridWidth) * ogridResolution;
+	particleToUpdate->y = (2 * particleToUpdate->i - (double)ogridHeight) * ogridResolution;
 
 	// Randomize an angle
 	particleToUpdate->yaw = rand() % 360;
@@ -230,8 +239,11 @@ void LocalizationManager::UpdateParticle(Particle * particleToUpdate, Particle *
 			particleToUpdate->y = betterParticle->y+ 0.1-0.2*(double)rand()/(double)RAND_MAX;
 		}
 
-		particleToUpdate->i = (double) ogrid.getHeight() / 2 - particleToUpdate->y / ogrid.getResolution();
-		particleToUpdate->j = particleToUpdate->x / ogrid.getResolution()+ ogrid.getWidth() / 2;
+		// Convert location on map to indices
+		/*particleToUpdate->i = (double) ogrid.getHeight() / 2 - particleToUpdate->y / ogrid.getResolution();
+		particleToUpdate->j = particleToUpdate->x / ogrid.getResolution()+ ogrid.getWidth() / 2;*/
+		particleToUpdate->i = particleToUpdate->y / ogridResolution + (double)ogridHeight / 2;
+		particleToUpdate->j = particleToUpdate->x / ogridResolution + (double)ogridWidth / 2;
 
 	} while (ogrid.getCell(particleToUpdate->i, particleToUpdate->j) != CELL_FREE);
 

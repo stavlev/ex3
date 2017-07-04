@@ -16,21 +16,6 @@ MovementManager::MovementManager(HamsterAPI::Hamster * hamster)
 	this->yaw = 0;
 }
 
-void MovementManager::GetScansBetween(double min, double max, std::vector<double> & distances)
-{
-	HamsterAPI::LidarScan scan = hamster->getLidarScan();
-
-	for (size_t i = 0; i < scan.getScanSize(); i++)
-	{
-		double degree = scan.getScanAngleIncrement() * i;
-
-		if (degree >= min && degree <= max)
-		{
-			distances.push_back(scan.getDistance(i));
-		}
-	}
-}
-
 void MovementManager::MoveForward()
 {
 	HamsterAPI::Log::i("Client", "Moving Forward");
@@ -163,13 +148,13 @@ void MovementManager::MoveTo(Robot * robot, Location currLocation, Location * de
 
 	MoveForward();
 	currLocation = robot->GetCurrentLocation();
-
 	double distanceFromDestination = sqrt(pow(currLocation.x - destination->x, 2) + pow(currLocation.y - destination->y, 2));
 
 	while (distanceFromDestination > DISTANCE_FROM_WAYPOINT_TOLERANCE)
 	{
 		MoveForward();
 		currLocation = robot->GetCurrentLocation();
+		distanceFromDestination = sqrt(pow(currLocation.x - destination->x, 2) + pow(currLocation.y - destination->y, 2));
 	}
 
 	MoveForward();

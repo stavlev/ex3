@@ -24,8 +24,10 @@ class LocalizationManager
 private:
 	vector<Particle *> particles;
 	const OccupancyGrid & ogrid;
+	int ogridHeight, ogridWidth;
+	double ogridResolution;
 	Hamster * hamster;
-	double ComputeBelief(Particle * particle);
+	float ComputeBelief(Particle * particle);
 	bool InsertOutOfRangeParticle(Particle * particle);
 	void UpdateParticle(Particle * particleToUpdate);
 	void UpdateParticle(Particle * particleToUpdate, Particle * betterParticle);

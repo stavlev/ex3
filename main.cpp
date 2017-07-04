@@ -48,7 +48,7 @@ int main()
 		{
 			try
 			{
-				/*Location currWaypoint = waypoints.at(waypointIndex);
+				Location currWaypoint = waypoints.at(waypointIndex);
 				Location currRobotLocation = robot.GetCurrentLocation();
 
 				double robotDistanceFromWaypoint =
@@ -68,7 +68,7 @@ int main()
 
 				usleep(444);
 
-				robot.UpdateLocation();*/
+				robot.UpdateLocation();
 
 				cout << "Real values:" <<
 						" deltaX : " << robot.GetDeltaX() <<
