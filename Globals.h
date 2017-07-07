@@ -16,7 +16,7 @@
 #define X_GOAL 655
 #define Y_GOAL 370
 
-#define DISTANCE_FROM_WAYPOINT_TOLERANCE 10
+#define DISTANCE_FROM_WAYPOINT_TOLERANCE 0
 
 #define numericCharToInt(numChar) (numChar - '0')
 #define degreesToRadians(angleDegrees) (angleDegrees * M_PI / 180.0)

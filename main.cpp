@@ -82,10 +82,10 @@ int main()
 						deltaY = robot.GetDeltaY();
 						deltaYaw = robot.GetDeltaYaw();
 
-						cout << "Real values:" <<
+						/*cout << "Real values:" <<
 								" deltaX : " << deltaX <<
 								" deltaY: " << deltaY <<
-								" deltaYaw : " << deltaYaw << endl;
+								" deltaYaw : " << deltaYaw << endl;*/
 
 						//localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);
 						//displayManager.PrintRouteCvMat(localizationManager.GetParticles());
