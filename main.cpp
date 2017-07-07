@@ -33,24 +33,16 @@ int main()
 		vector<Location> waypoints = waypointsManager.waypoints;
 
 		// Print the map including the planned route and chosen waypoints
-		DisplayManager displayManager = DisplayManager(&grid, plannedRoute, &waypoints);
+		DisplayManager displayManager = DisplayManager(&grid, plannedRoute, &waypoints, numOfWaypoints);
 		//displayManager.PrintRouteCvMat();
-
-		for (int i = 0; i < numOfWaypoints; i++)
-		{
-			Location currWaypoint = waypoints.at(i);
-			cout << "Waypoint " << i + 1 << ": " <<
-					"x = " << currWaypoint.x <<
-					", y = " << currWaypoint.y << endl;
-		}
+		displayManager.PrintWaypoints();
 
 		MovementManager movementManager(hamster);
 
 		robot.Initialize(startLocation);
 
 		int waypointIndex = 0;
-		bool isWaypointReached = false;
-		double deltaX = 0, deltaY = 0, deltaYaw = 0;
+		/*double deltaX = 0, deltaY = 0, deltaYaw = 0;*/
 
 		Location currRobotLocation;
 
@@ -61,53 +53,26 @@ int main()
 				while (waypointIndex < numOfWaypoints)
 				{
 					Location currWaypoint = waypoints.at(waypointIndex);
-
 					movementManager.MoveTo(&robot, &currWaypoint);
-					currRobotLocation = robot.GetCurrentLocation();
+					robot.UpdateLocation();
 
-					double robotDistanceFromWaypoint =
-						sqrt(pow(currWaypoint.x - currRobotLocation.x, 2) +
-							 pow(currWaypoint.y - currRobotLocation.y, 2));
+					/*deltaX = robot.GetDeltaX();
+					deltaY = robot.GetDeltaY();
+					deltaYaw = robot.GetDeltaYaw();
 
-					isWaypointReached = robotDistanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
-
-					while (!isWaypointReached)
-					{
-						movementManager.MoveTo(&robot, &currWaypoint);
-						currRobotLocation = robot.GetCurrentLocation();
-
-						robot.UpdateLocation();
-
-						deltaX = robot.GetDeltaX();
-						deltaY = robot.GetDeltaY();
-						deltaYaw = robot.GetDeltaYaw();
-
-						/*cout << "Real values:" <<
-								" deltaX : " << deltaX <<
-								" deltaY: " << deltaY <<
-								" deltaYaw : " << deltaYaw << endl;*/
-
-						//localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);
-						//displayManager.PrintRouteCvMat(localizationManager.GetParticles());
-						//localizationManager.PrintParticles();
-
-						double robotDistanceFromWaypoint =
-							sqrt(pow(currWaypoint.x - currRobotLocation.x, 2) +
-								 pow(currWaypoint.y - currRobotLocation.y, 2));
-
-						isWaypointReached = robotDistanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
-					}
+					cout << "Real values:" << " deltaX : " << deltaX << " deltaY: " << deltaY << " deltaYaw : " << deltaYaw << endl;
+*/
+					//localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);
+					//displayManager.PrintRouteCvMat(localizationManager.GetParticles());
+					//localizationManager.PrintParticles();
 
 					waypointIndex++;
 				}
 
-				if (waypointIndex == numOfWaypoints)
-				{
-					movementManager.StopMoving();
-					cout << "Hamster has reached its destination!" << endl;
+				movementManager.StopMoving();
+				cout << "Hamster has reached its destination!" << endl;
 
-					return 0;
-				}
+				return 0;
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{

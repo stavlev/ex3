@@ -33,13 +33,15 @@ private:
 	cv::Mat_<cv::Vec3b> routeCvMat;
 	string plannedRoute;
 	vector<Location> waypoints;
+	int numOfWaypoints;
 	void InitMapWithRoute();
 	void InitMapWithParticles(vector<Particle *> particles);
 	void ColorPixelByRoute(int currentCellValue, int i, int j);
 	void ColorPixelByParticles(int currentCellValue, int i, int j);
 
 public:
-	DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints);
+	DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints, int numOfWaypoints);
+	void PrintWaypoints();
 	void PrintRouteCvMat();
 	void PrintRouteCvMat(vector<Particle *> particles);
 	virtual ~DisplayManager();

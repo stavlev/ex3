@@ -13,7 +13,7 @@
 #define TOP_PARTICLES_NUM 5
 #define BELIEF_LEVEL 0.5
 
-DisplayManager::DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints)
+DisplayManager::DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints, int numOfWaypoints)
 {
 	this->startRow = grid->GetGridStartLocation().y;
 	this->startCol = grid->GetGridStartLocation().x;
@@ -25,6 +25,16 @@ DisplayManager::DisplayManager(Grid * grid, string plannedRoute, vector<Location
 
 	this->plannedRoute = plannedRoute;
 	this->waypoints = *waypoints;
+	this->numOfWaypoints = numOfWaypoints;
+}
+
+void DisplayManager::PrintWaypoints()
+{
+	for (int i = 0; i < numOfWaypoints; i++)
+	{
+		Location currWaypoint = waypoints.at(i);
+		cout << "Waypoint " << i + 1 << ": " << "x = " << currWaypoint.x << ", y = " << currWaypoint.y << endl;
+	}
 }
 
 void DisplayManager::PrintRouteCvMat()
