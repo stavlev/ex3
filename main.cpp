@@ -36,82 +36,78 @@ int main()
 		DisplayManager displayManager = DisplayManager(&grid, plannedRoute, &waypoints);
 		//displayManager.PrintRouteCvMat();
 
+		for (int i = 0; i < numOfWaypoints; i++)
+		{
+			Location currWaypoint = waypoints.at(i);
+			cout << "Waypoint " << i + 1 << ": " <<
+					"x = " << currWaypoint.x <<
+					", y = " << currWaypoint.y << endl;
+		}
+
 		MovementManager movementManager(hamster);
 
 		robot.Initialize(startLocation);
 
-		bool isAllowedToStartMoving = false;
 		int waypointIndex = 0;
-		double deltaX = 0, deltaY = 0, deltaYaw = 0, yaw = 0;
+		bool isWaypointReached = false;
+		double deltaX = 0, deltaY = 0, deltaYaw = 0;
 
-		Location currRobotLocation = robot.GetCurrentLocation();
-		double robotDistanceFromTopParticle =
-			sqrt(pow((startLocation.x - currRobotLocation.x), 2) +
-				 pow((startLocation.y - currRobotLocation.y), 2));
+		Location currRobotLocation;
 
-		while (hamster->isConnected() && waypointIndex < numOfWaypoints)
+		while (hamster->isConnected())
 		{
 			try
 			{
-				// Wait until the highest-belief particle is close enough to the robot's start location
-				if (!isAllowedToStartMoving)
+				while (waypointIndex < numOfWaypoints)
 				{
-					if (robotDistanceFromTopParticle > DISTANCE_FROM_WAYPOINT_TOLERANCE)
-					{
-						currRobotLocation = robot.GetCurrentLocation();
-						robotDistanceFromTopParticle =
-							sqrt(pow((startLocation.x - currRobotLocation.x), 2) +
-								 pow((startLocation.y - currRobotLocation.y), 2));
-						cout << "top particle: (" << currRobotLocation.x << ", " << currRobotLocation.y << "), distance from destination: " << robotDistanceFromTopParticle << endl;
-
-						usleep(444);
-						robot.UpdateLocation();
-
-						/*deltaX = robot.GetDeltaX();
-						deltaY = robot.GetDeltaY();
-						deltaYaw = robot.GetDeltaYaw();*/
-
-						localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);
-						localizationManager.PrintParticles();
-					}
-					else
-					{
-						isAllowedToStartMoving = true;
-					}
-				}
-				/*else
-				{
-					currRobotLocation = robot.GetCurrentLocation();
 					Location currWaypoint = waypoints.at(waypointIndex);
+
+					movementManager.MoveTo(&robot, &currWaypoint);
+					currRobotLocation = robot.GetCurrentLocation();
 
 					double robotDistanceFromWaypoint =
 						sqrt(pow(currWaypoint.x - currRobotLocation.x, 2) +
 							 pow(currWaypoint.y - currRobotLocation.y, 2));
 
-					bool isWaypointReached = robotDistanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
+					isWaypointReached = robotDistanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
 
-					if (isWaypointReached)
-					{
-						waypointIndex++;
-					}
-					else
+					while (!isWaypointReached)
 					{
 						movementManager.MoveTo(&robot, &currWaypoint);
+						currRobotLocation = robot.GetCurrentLocation();
+
+						robot.UpdateLocation();
+
+						deltaX = robot.GetDeltaX();
+						deltaY = robot.GetDeltaY();
+						deltaYaw = robot.GetDeltaYaw();
+
+						cout << "Real values:" <<
+								" deltaX : " << deltaX <<
+								" deltaY: " << deltaY <<
+								" deltaYaw : " << deltaYaw << endl;
+
+						//localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);
+						//displayManager.PrintRouteCvMat(localizationManager.GetParticles());
+						//localizationManager.PrintParticles();
+
+						double robotDistanceFromWaypoint =
+							sqrt(pow(currWaypoint.x - currRobotLocation.x, 2) +
+								 pow(currWaypoint.y - currRobotLocation.y, 2));
+
+						isWaypointReached = robotDistanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
 					}
 
-					usleep(444);
+					waypointIndex++;
+				}
 
-					robot.UpdateLocation();
+				if (waypointIndex == numOfWaypoints)
+				{
+					movementManager.StopMoving();
+					cout << "Hamster has reached its destination!" << endl;
 
-					cout << "Real values:" <<
-							" deltaX : " << robot.GetDeltaX() <<
-							" deltaY: " << robot.GetDeltaY() <<
-							" deltaYaw : " << robot.GetDeltaYaw() << endl;
-
-					localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);//robot.getDeltaX(), robot.getDeltaY(), robot.getDeltaYaw());
-					displayManager.PrintRouteCvMat(localizationManager.GetParticles());
-					localizationManager.PrintParticles();
-				}*/
+					return 0;
+				}
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{

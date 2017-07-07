@@ -20,6 +20,7 @@ class MovementManager
 private:
 	HamsterAPI::Hamster * hamster;
 	void Turn(float wheelsAngle, string direction);
+	void AdjustYaw(double * yaw);
 
 public:
 	double deltaX, deltaY, deltaYaw, yaw;

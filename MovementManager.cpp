@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sstream>
 
 #define SPAN 100
 #define MOVE_SPEED 0.4
@@ -94,55 +95,104 @@ void MovementManager::StopMoving()
 	hamster->sendSpeed(0.0, 0.0);
 }
 
-void MovementManager::MoveTo(Robot * robot, Location * destination)
+void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 {
 	Location currLocation = robot->GetCurrentLocation();
 
-	double deltaX = destination->x - currLocation.x;
-	double deltaY = destination->y - currLocation.y;
+	double deltaX = waypoint->x - currLocation.x;
+	double deltaY = waypoint->y - currLocation.y;
 	double currentYaw = currLocation.yaw;
+	AdjustYaw(&currentYaw);
 
-	double newYawInRad = atan2(deltaY, deltaX);
-	double newYaw = radiansToDegrees(newYawInRad);
+	double destYawInRad = atan2(deltaY, deltaX);
+	double destYaw = radiansToDegrees(destYawInRad);
+	double origDestYaw = destYaw;
+	AdjustYaw(&destYaw);
 
-	if (newYaw < 0)
-	{
-		newYaw += 360;
-	}
+	std::stringstream stringStream;
+	stringStream << "Preparing to move..." << endl <<
+			"current location: " <<
+			"x = " << currLocation.x <<
+			", y = " << currLocation.y <<
+			", yaw = " << currentYaw << endl <<
+			"current waypoint: " <<
+			"x = " << waypoint->x <<
+			", y = " << waypoint->y << endl <<
+			"movement angle: " << origDestYaw << " (" << destYaw << ")" << endl;
+	string message = stringStream.str();
+	HamsterAPI::Log::i("Client", message);
 
 	// Keep turning while the robot's angle is different than the destination angle
-
-	while (abs(newYaw - currentYaw) > 1)
+	while (abs(destYaw - currentYaw) > DISTANCE_FROM_WAYPOINT_TOLERANCE)
 	{
-		if (currentYaw > newYaw)
+		if (currentYaw > destYaw)
 		{
-			if (360 - currentYaw + newYaw < currentYaw - newYaw)
+			if (360 - currentYaw + destYaw < currentYaw - destYaw)
 			{
-				TurnRight();
+				TurnLeft();
 			}
 			else
 			{
-				TurnLeft();
+				TurnRight();
 			}
 		}
 		else
 		{
-			if (360 - newYaw + currentYaw < newYaw - currentYaw)
+			if (360 - destYaw + currentYaw < destYaw - currentYaw)
 			{
-				TurnLeft();
+				TurnRight();
 			}
 			else
 			{
-				TurnRight();
+				TurnLeft();
 			}
 		}
 
 		currLocation = robot->GetCurrentLocation();
 		currentYaw = currLocation.yaw;
+
+		AdjustYaw(&currentYaw);
+
+		std::stringstream stringStream;
+		stringStream << "Moved to: " <<
+			"x = " << currLocation.x <<
+			", y = " << currLocation.y <<
+			", yaw = " << currentYaw << "\n" <<
+			"destYaw =  " << destYaw << ", currentYaw = " << currentYaw <<
+			", destYaw - currentYaw = " << destYaw - currentYaw << "\n";
+		string message = stringStream.str();
+		HamsterAPI::Log::i("Client", message);
 	}
 
-	// Once the destination yaw is correct - keep moving forward in this direction
-	MoveForward();
+	/*StopMoving();
+	currLocation = robot->GetCurrentLocation();
+
+	double robotDistanceFromDestination =
+		sqrt(pow(currLocation.x - destination->x, 2) +
+			 pow(currLocation.y - destination->y, 2));
+
+	while(robotDistanceFromDestination > DISTANCE_FROM_WAYPOINT_TOLERANCE)
+	{*/
+		// Once the destination yaw is correct - keep moving forward in this direction
+		MoveForward();
+		usleep(444);
+
+		/*currLocation = robot->GetCurrentLocation();
+
+		robotDistanceFromDestination =
+			sqrt(pow(currLocation.x - destination->x, 2) +
+				 pow(currLocation.y - destination->y, 2));
+	}
+
+	StopMoving();*/
+}
+
+void MovementManager::AdjustYaw(double * yaw)
+{
+	if (*yaw < 0)
+	{
+		*yaw += 360;
+	}
 }
 
 MovementManager::~MovementManager() {

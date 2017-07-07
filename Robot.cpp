@@ -28,7 +28,23 @@ void Robot::Initialize(Location startLocation)
 	sleep(3);
 	hamster->setInitialPose(initialPose);
 
-	localizationManager->InitParticles();
+	Location currLocation = GetCurrentLocation();
+	double distanceFromInitialPose =
+		sqrt(pow(startLocation.x - currLocation.x, 2) +
+			 pow(startLocation.y - currLocation.y, 2));
+
+	// Wait until the robot processes the setInitialPose request
+	while (distanceFromInitialPose > 5)
+	{
+		usleep(10);
+
+		currLocation = GetCurrentLocation();
+		distanceFromInitialPose =
+			sqrt(pow(startLocation.x - currLocation.x, 2) +
+				 pow(startLocation.y - currLocation.y, 2));
+	}
+
+	//localizationManager->InitParticles();
 	UpdateLocation();
 }
 
@@ -49,14 +65,17 @@ double Robot::GetDeltaYaw() const
 
 Location Robot::GetCurrentLocation()
 {
-	Particle * topParticle = localizationManager->GetTopParticle();
+	/*Particle * topParticle = localizationManager->GetTopParticle();
 
 	Location currLocation;
 	currLocation = {
 			.x = topParticle->x + 2*inflationRadius,
 			.y = topParticle->y + 2*inflationRadius,
 			.yaw = topParticle->yaw
-	};
+	};*/
+
+	Pose currPose = hamster->getPose();
+	Location currLocation = { .x = currPose.getX(), .y = currPose.getY(), .yaw = currPose.getHeading() };
 
 	return currLocation;
 }
