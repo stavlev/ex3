@@ -163,7 +163,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 	return;
 }
 
-float MovementManager::GetDirectionToMoveIn(double currYaw, double destYaw)
+float MovementManager::GetDirectionToMoveIn(double currYaw, double destYaw) const
 {
 	if (currYaw > destYaw)
 	{
@@ -189,7 +189,7 @@ float MovementManager::GetDirectionToMoveIn(double currYaw, double destYaw)
 	}
 }
 
-double MovementManager::GetDistanceFromWaypoint(Location * currLocation, Location * waypoint)
+double MovementManager::GetDistanceFromWaypoint(Location * currLocation, Location * waypoint) const
 {
 	double distanceFromWaypoint =
 		sqrt(pow(currLocation->x - waypoint->x, 2) +
@@ -198,7 +198,7 @@ double MovementManager::GetDistanceFromWaypoint(Location * currLocation, Locatio
 	return distanceFromWaypoint;
 }
 
-double MovementManager::GetAdjustedYaw(double yawToAdjust)
+double MovementManager::GetAdjustedYaw(double yawToAdjust) const
 {
 	if (yawToAdjust < 0)
 	{
@@ -214,7 +214,7 @@ double MovementManager::GetAdjustedYaw(double yawToAdjust)
 // Calculate the turn speed according to the current delta yaw in a circular way (0 = 360),
 // so that the robot would turn slower as it approaches the destination yaw in order not
 // to miss it
-double MovementManager::CalculateTurnSpeedByDeltaYaw(double currDeltaYaw)
+double MovementManager::CalculateTurnSpeedByDeltaYaw(double currDeltaYaw) const
 {
 	int numOfSpeedClasses = 5;
 	double diffConst = 2 * ((double)(MAX_TURN_SPEED - MIN_TURN_SPEED) / (numOfSpeedClasses - 1));

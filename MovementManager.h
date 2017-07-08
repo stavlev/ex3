@@ -19,14 +19,14 @@ class MovementManager
 {
 private:
 	HamsterAPI::Hamster * hamster;
-	float GetDirectionToMoveIn(double currYaw, double destYaw);
-	double GetDistanceFromWaypoint(Location * currLocation, Location * waypoint);
-	double GetAdjustedYaw(double yawToAdjust);
-	double CalculateTurnSpeedByDeltaYaw(double deltaYaw);
+	float GetDirectionToMoveIn(double currYaw, double destYaw) const;
+	double GetDistanceFromWaypoint(Location * currLocation, Location * waypoint) const;
+	double GetAdjustedYaw(double yawToAdjust) const;
+	double CalculateTurnSpeedByDeltaYaw(double deltaYaw) const;
 
 public:
 	MovementManager(HamsterAPI::Hamster * hamster);
-	void MoveTo(Robot * robot, Location * destination);
+	void MoveTo(Robot * robot, Location * waypoint);
 	void MoveForward();
 	void MoveBackwards();
 	void StopMoving() ;
