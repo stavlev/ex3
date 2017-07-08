@@ -22,6 +22,7 @@ private:
 	float GetDirectionToMoveIn(double currYaw, double destYaw);
 	double GetDistanceFromWaypoint(Location * currLocation, Location * waypoint);
 	double GetAdjustedYaw(double yawToAdjust);
+	double CalculateTurnSpeedByDeltaYaw(double deltaYaw);
 
 public:
 	MovementManager(HamsterAPI::Hamster * hamster);

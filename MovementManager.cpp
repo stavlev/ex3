@@ -5,8 +5,9 @@
 #include <time.h>
 #include <sstream>
 
-#define MOVE_SPEED 0.1
-#define TURN_SPEED 0.2
+#define MOVE_SPEED 0.2
+#define MIN_TURN_SPEED 0.1
+#define MAX_TURN_SPEED 0.2
 
 #define LEFT 45.0
 #define RIGHT -45.0
@@ -67,7 +68,9 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 	// Keep turning in the chosen direction while the robot's angle is different than the destination angle
 	while (abs(destYaw - currYaw) > YAW_TOLERANCE)
 	{
-		hamster->sendSpeed(TURN_SPEED, direction);
+		double deltaYaw = fabs(destYaw - currYaw);
+		double turnSpeed = CalculateTurnSpeedByDeltaYaw(deltaYaw);
+		hamster->sendSpeed(turnSpeed, direction);
 
 		prevLocation = currLocation;
 		currLocation = robot->GetCurrentLocation();
@@ -86,7 +89,8 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 				"x = " << currLocation.x <<
 				", y = " << currLocation.y <<
 				", yaw = " << currYaw <<
-				", deltaYaw = " << abs(destYaw - currYaw) << endl;
+				", deltaYaw = " << fabs(destYaw - currYaw) <<
+				" (turnSpeed: " << turnSpeed << ")" << endl;
 			message = stringStream.str();
 			HamsterAPI::Log::i("Client", message);
 		}
@@ -100,8 +104,22 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 	while (distanceFromDest > DISTANCE_FROM_WAYPOINT_TOLERANCE)
 	{
-		// Once the destination yaw is correct - keep moving forward in this direction
-		MoveForward();
+		string direction;
+
+		// Check if the robot accidentally missed the current destination, and if it did -
+		// try fixing it by moving backwards in the same angle
+		if (distanceFromDest > prevDistanceFromDest)
+		{
+			MoveBackwards();
+			direction = "Backwards";
+		}
+		else
+		{
+			// Once the destination yaw is correct - keep moving forward in this direction
+			MoveForward();
+			direction = "Forward";
+		}
+
 		usleep(5000);
 
 		currLocation = robot->GetCurrentLocation();
@@ -113,7 +131,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 		if (locationChanged)
 		{
 			stringStream.flush();
-			stringStream << "Moved Forward, current location: " <<
+			stringStream << "Moved " << direction << ", current location: " <<
 				"x = " << currLocation.x <<
 				", y = " << currLocation.y <<
 				", yaw = " << currYaw <<
@@ -178,6 +196,35 @@ double MovementManager::GetAdjustedYaw(double yawToAdjust)
 	{
 		return yawToAdjust - 360;
 	}
+}
+
+// Calculate the turn speed according to the current delta yaw in a circular way (0 = 360),
+// so that the robot would turn slower as it approaches the destination yaw in order not
+// to miss it
+double MovementManager::CalculateTurnSpeedByDeltaYaw(double currDeltaYaw)
+{
+	int numOfSpeedClasses = 5;
+	double diffConst = 2 * ((double)(MAX_TURN_SPEED - MIN_TURN_SPEED) / (numOfSpeedClasses - 1));
+
+	double classSize = (double)360.0 / numOfSpeedClasses;
+
+	double divisionResult = (double)currDeltaYaw / classSize;
+
+	// Varies from (0) to (numOfSpeedClasses - 1)
+	int speedClassIndex = floor(divisionResult);
+
+	double turnSpeed;
+
+	if (speedClassIndex > ((int)(numOfSpeedClasses / 2)))
+	{
+		turnSpeed = MIN_TURN_SPEED + (numOfSpeedClasses - speedClassIndex) * diffConst;
+	}
+	else
+	{
+		turnSpeed = MIN_TURN_SPEED + speedClassIndex * diffConst;
+	}
+
+	return turnSpeed;
 }
 
 MovementManager::~MovementManager() {
