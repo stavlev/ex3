@@ -19,10 +19,15 @@ class MovementManager
 {
 private:
 	HamsterAPI::Hamster * hamster;
+	std::stringstream stringStream;
 	float GetDirectionToMoveIn(double currYaw, double destYaw) const;
-	double GetDistanceFromWaypoint(Location * currLocation, Location * waypoint) const;
 	double GetAdjustedYaw(double yawToAdjust) const;
+	double CalculateDistanceFromWaypoint(Location * currLocation, Location * waypoint) const;
 	double CalculateTurnSpeedByDeltaYaw(double deltaYaw) const;
+	void PrintBeforeTurning(Location currLocation, Location * waypoint, double currYaw, double destYaw);
+	void PrintAfterTurning(string directionName, Location currLocation, double currYaw, double currDeltaYaw, double turnSpeed);
+	void PrintAfterMoving(string directionName, Location currLocation, double currYaw, double distanceFromDest);
+	void PrintAfterWaypointIsReached(Location * waypoint);
 
 public:
 	MovementManager(HamsterAPI::Hamster * hamster);

@@ -48,19 +48,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 	double destYawInDegrees = radiansToDegrees(destYawInRad);
 	const double destYaw = GetAdjustedYaw(destYawInDegrees);
 
-	std::stringstream stringStream;
-	string message;
-	stringStream << "Preparing to move..." << endl <<
-		"current location: " <<
-		"x = " << currLocation.x <<
-		", y = " << currLocation.y <<
-		", yaw = " << currYaw << endl <<
-		"current waypoint: " <<
-		"x = " << waypoint->x <<
-		", y = " << waypoint->y << endl <<
-		"destYaw: " << destYaw << endl;
-	message = stringStream.str();
-	HamsterAPI::Log::i("Client", message);
+	PrintBeforeTurning(currLocation, waypoint, currYaw, destYaw);
 
 	double prevDeltaYaw;
 	double currDeltaYaw = fabs(destYaw - currYaw);
@@ -90,15 +78,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 		if (locationChanged)
 		{
 			string directionName = wheelsAngle == leftTurnAngle() ? "Left" : "Right";
-			stringStream.flush();
-			stringStream << "Moved " << directionName << " to: " <<
-				"x = " << currLocation.x <<
-				", y = " << currLocation.y <<
-				", yaw = " << currYaw <<
-				", deltaYaw = " << currDeltaYaw <<
-				" (turnSpeed: " << turnSpeed << ")" << endl;
-			message = stringStream.str();
-			HamsterAPI::Log::i("Client", message);
+			PrintAfterTurning(directionName, currLocation, currYaw, currDeltaYaw, turnSpeed);
 
 			// Check if the robot accidentally missed the destination yaw, and if it did -
 			// try fixing it by turning in the opposite direction
@@ -110,7 +90,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 	}
 
 	currLocation = robot->GetCurrentLocation();
-	double distanceFromDest = GetDistanceFromWaypoint(&currLocation, waypoint);
+	double distanceFromDest = CalculateDistanceFromWaypoint(&currLocation, waypoint);
 	double prevDistanceFromDest;
 
 	HamsterAPI::Log::i("Client", "Destination yaw reached, moving forward towards waypoint\n");
@@ -137,29 +117,19 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 		currLocation = robot->GetCurrentLocation();
 		prevDistanceFromDest = distanceFromDest;
-		distanceFromDest = GetDistanceFromWaypoint(&currLocation, waypoint);
+		distanceFromDest = CalculateDistanceFromWaypoint(&currLocation, waypoint);
 
 		locationChanged = prevDistanceFromDest != distanceFromDest;
 
 		if (locationChanged)
 		{
-			stringStream.flush();
-			stringStream << "Moved " << directionName << ", current location: " <<
-				"x = " << currLocation.x <<
-				", y = " << currLocation.y <<
-				", yaw = " << currYaw <<
-				", distanceFromDest =  " << distanceFromDest << endl;
-			message = stringStream.str();
-			HamsterAPI::Log::i("Client", message);
+			PrintAfterMoving(directionName, currLocation, currYaw, distanceFromDest);
 		}
 	}
 
-	stringStream.flush();
-	stringStream << "Reached waypoint (" << waypoint->x << ", " << waypoint->y << ")" << endl;
-	message = stringStream.str();
-	HamsterAPI::Log::i("Client", message);
-
+	PrintAfterWaypointIsReached(waypoint);
 	StopMoving();
+
 	return;
 }
 
@@ -189,15 +159,6 @@ float MovementManager::GetDirectionToMoveIn(double currYaw, double destYaw) cons
 	}
 }
 
-double MovementManager::GetDistanceFromWaypoint(Location * currLocation, Location * waypoint) const
-{
-	double distanceFromWaypoint =
-		sqrt(pow(currLocation->x - waypoint->x, 2) +
-			 pow(currLocation->y - waypoint->y, 2));
-
-	return distanceFromWaypoint;
-}
-
 double MovementManager::GetAdjustedYaw(double yawToAdjust) const
 {
 	if (yawToAdjust < 0)
@@ -209,6 +170,15 @@ double MovementManager::GetAdjustedYaw(double yawToAdjust) const
 	{
 		return yawToAdjust - 360;
 	}
+}
+
+double MovementManager::CalculateDistanceFromWaypoint(Location * currLocation, Location * waypoint) const
+{
+	double distanceFromWaypoint =
+		sqrt(pow(currLocation->x - waypoint->x, 2) +
+			 pow(currLocation->y - waypoint->y, 2));
+
+	return distanceFromWaypoint;
 }
 
 // Calculate the turn speed according to the current delta yaw in a circular way (0 = 360),
@@ -238,6 +208,62 @@ double MovementManager::CalculateTurnSpeedByDeltaYaw(double currDeltaYaw) const
 	}
 
 	return turnSpeed;
+}
+
+void MovementManager::PrintBeforeTurning(
+	Location currLocation, Location * waypoint, double currYaw, double destYaw)
+{
+	stringStream.flush();
+	string message;
+	stringStream << "Preparing to turn..." << endl <<
+		"current location: " <<
+		"x = " << currLocation.x <<
+		", y = " << currLocation.y <<
+		", yaw = " << currYaw << endl <<
+		"current waypoint: " <<
+		"x = " << waypoint->x <<
+		", y = " << waypoint->y << endl <<
+		"destYaw: " << destYaw << endl;
+	message = stringStream.str();
+	HamsterAPI::Log::i("Client", message);
+}
+
+void MovementManager::PrintAfterTurning(
+	string directionName, Location currLocation, double currYaw, double currDeltaYaw, double turnSpeed)
+{
+	stringStream.flush();
+	string message;
+	stringStream << "Turned " << directionName << " to: " <<
+		"x = " << currLocation.x <<
+		", y = " << currLocation.y <<
+		", yaw = " << currYaw <<
+		", deltaYaw = " << currDeltaYaw <<
+		" (turnSpeed: " << turnSpeed << ")" << endl;
+	message = stringStream.str();
+	HamsterAPI::Log::i("Client", message);
+}
+
+void MovementManager::PrintAfterMoving(
+	string directionName, Location currLocation, double currYaw, double distanceFromDest)
+{
+	stringStream.flush();
+	string message;
+	stringStream << "Moved " << directionName << " to: " <<
+		"x = " << currLocation.x <<
+		", y = " << currLocation.y <<
+		", yaw = " << currYaw <<
+		", distanceFromDest =  " << distanceFromDest << endl;
+	message = stringStream.str();
+	HamsterAPI::Log::i("Client", message);
+}
+
+void MovementManager::PrintAfterWaypointIsReached(Location * waypoint)
+{
+	stringStream.flush();
+	string message;
+	stringStream << endl << "Reached waypoint (" << waypoint->x << ", " << waypoint->y << ")" << endl << endl;
+	message = stringStream.str();
+	HamsterAPI::Log::i("Client", message);
 }
 
 MovementManager::~MovementManager() {
