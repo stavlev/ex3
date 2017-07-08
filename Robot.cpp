@@ -1,10 +1,14 @@
 #include "Robot.h"
 
-Robot::Robot(Hamster * hamster, LocalizationManager * localizationManager, int inflationRadius)
+Robot::Robot(
+	Hamster * hamster, LocalizationManager * localizationManager, int inflationRadius,
+	double mapHeight, double mapWidth)
 {
 	this->hamster = hamster;
 	this->localizationManager = localizationManager;
 	this->inflationRadius = inflationRadius;
+	this->mapHeight = mapHeight;
+	this->mapWidth = mapWidth;
 
 	this->prevX = 0;
 	this->prevY = 0;
@@ -16,34 +20,23 @@ Robot::Robot(Hamster * hamster, LocalizationManager * localizationManager, int i
 
 void Robot::Initialize(Location startLocation)
 {
-	currX = startLocation.x;
-	currY = startLocation.y;
+	hamsterStartX = startLocation.x - (mapWidth / 2);
+	hamsterStartY = startLocation.y - (mapHeight / 2);
+
+	currX = hamsterStartX;
+	currY = hamsterStartY;
 	currYaw = startLocation.yaw;
 
 	Pose initialPose;
-	initialPose.setX(startLocation.x);
-	initialPose.setY(startLocation.y);
+	initialPose.setX(hamsterStartX);
+	initialPose.setY(hamsterStartY);
 	initialPose.setHeading(startLocation.yaw);
 
 	// The robot wouldn't start moving without the call to setInitialPose
 	sleep(3);
 	hamster->setInitialPose(initialPose);
 
-	Location currLocation = GetCurrentLocation(false);
-	double distanceFromInitialPose =
-		sqrt(pow(startLocation.x - currLocation.x, 2) +
-			 pow(startLocation.y - currLocation.y, 2));
-
-	// Wait until the robot processes the setInitialPose request
-	while (distanceFromInitialPose > 5)
-	{
-		usleep(10);
-
-		currLocation = GetCurrentLocation(false);
-		distanceFromInitialPose =
-			sqrt(pow(startLocation.x - currLocation.x, 2) +
-				 pow(startLocation.y- currLocation.y, 2));
-	}
+	Location currLocation = GetCurrHamsterLocation(false);
 
 	//localizationManager->InitParticles();
 
@@ -65,7 +58,7 @@ double Robot::GetDeltaYaw() const
 	return currYaw - prevYaw;
 }
 
-Location Robot::GetCurrentLocation(bool scaleToCm /* = true*/)
+Location Robot::GetCurrHamsterLocation(bool scaleToCm /* = true*/)
 {
 	/*Particle * topParticle = localizationManager->GetTopParticle();
 
@@ -78,12 +71,11 @@ Location Robot::GetCurrentLocation(bool scaleToCm /* = true*/)
 
 	Pose currPose = hamster->getPose();
 
-	double poseX = currPose.getX();
-	double poseY = currPose.getY();
-	double poseYaw = currPose.getHeading();
+	double poseX = currPose.getX() - hamsterStartX;
+	double poseY = currPose.getY() - hamsterStartY;
 
-	double currX = scaleToCm ? (poseX * 100) : (poseX);
-	double currY = scaleToCm ? (poseY * 100) : (poseY);
+	double currX = /*scaleToCm ? (poseX * 100) :*/ (poseX);
+	double currY = /*scaleToCm ? (poseY * 100) :*/ (poseY);
 
 	double currYaw = currPose.getHeading();
 
@@ -103,7 +95,7 @@ Location Robot::GetCurrentLocation(bool scaleToCm /* = true*/)
 
 void Robot::UpdateLocation()
 {
-	Location currentLocation = GetCurrentLocation();
+	Location currentLocation = GetCurrHamsterLocation();
 
 	prevX = currX;
 	prevY = currY;

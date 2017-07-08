@@ -12,8 +12,6 @@ public:
 	ConfigurationManager(double mapHeight, double mapWidth);
 	Location GetStartLocation();
 	Location GetGoalLocation();
-	Location GetHamsterStartLocation();
-	Location GetHamsterGoalLocation();
 	int GetRobotRadiusInCm();
 };
 

@@ -30,7 +30,7 @@ int main()
 		Grid grid = map.grid;
 
 		LocalizationManager localizationManager(hamster, occupancyGrid, mapHeight, mapWidth, mapResolution);
-		Robot robot(hamster, &localizationManager, map.inflationRadius);
+		Robot robot(hamster, &localizationManager, map.inflationRadius, mapHeight, mapWidth);
 
 		PathPlanner pathPlanner = PathPlanner(&grid);
 		string plannedRoute = pathPlanner.plannedRoute;
@@ -47,11 +47,10 @@ int main()
 
 		MovementManager movementManager(hamster);
 
-		Location hamsterStartLocation = configurationManager.GetHamsterStartLocation();
-		robot.Initialize(hamsterStartLocation);
+		robot.Initialize(startLocation);
 
 		int waypointIndex = 0;
-		Location currWaypoint;
+		Location currWaypoint, hamsterWaypoint;
 		double deltaX = 0, deltaY = 0, deltaYaw = 0;
 
 		/*movementManager.MoveTo(&robot, &hamsterStartLocation);
@@ -61,18 +60,17 @@ int main()
 		{
 			try
 			{
-				displayManager.PrintRouteCvMat();
-				/*sleep(20);
+				/*displayManager.PrintRouteCvMat();
+				sleep(20);*/
 
 				while (waypointIndex < numOfWaypoints)
 				{
 					currWaypoint = waypoints.at(waypointIndex);
 
 					// Convert cv::Mat location to HamsterAPI::Hamster location
-					currWaypoint.x -= (mapWidth / 2);
-					currWaypoint.y -= (mapHeight / 2);
+					hamsterWaypoint = displayManager.ConvertToHamsterLocation(currWaypoint);
 
-					movementManager.MoveTo(&robot, &currWaypoint);
+					movementManager.MoveTo(&robot, &hamsterWaypoint);
 					waypointIndex++;
 
 					robot.UpdateLocation();
@@ -91,7 +89,7 @@ int main()
 				movementManager.StopMoving();
 				cout << "Hamster has reached its destination!" << endl;
 
-				return 0;*/
+				return 0;
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{

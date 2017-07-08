@@ -5,7 +5,7 @@
 #include <time.h>
 #include <sstream>
 
-#define MAX_MOVE_SPEED 0.5
+#define MAX_MOVE_SPEED 0.4
 
 #define MIN_TURN_SPEED 0.1
 #define MAX_TURN_SPEED 0.2
@@ -13,7 +13,7 @@
 #define TURN_ANGLE 45.0
 
 #define YAW_TOLERANCE 1
-#define DISTANCE_FROM_WAYPOINT_TOLERANCE 10
+#define DISTANCE_FROM_WAYPOINT_TOLERANCE 5
 
 // Minimum time to wait between changing the wheels angle,
 // or else Hamster will not have the chance to complete its turning
@@ -38,7 +38,7 @@ void MovementManager::StopMoving()
 void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 {
 	Location prevLocation;
-	Location currLocation = robot->GetCurrentLocation();
+	Location currLocation = robot->GetCurrHamsterLocation();
 
 	double deltaX = waypoint->x - currLocation.x;
 	double deltaY = waypoint->y - currLocation.y;
@@ -71,7 +71,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 		hamster->sendSpeed(turnSpeed, wheelsAngle);
 
 		prevLocation = currLocation;
-		currLocation = robot->GetCurrentLocation();
+		currLocation = robot->GetCurrHamsterLocation();
 		currYaw = currLocation.yaw;
 
 		locationChanged =
@@ -112,7 +112,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 	double moveSpeed;
 
-	currLocation = robot->GetCurrentLocation();
+	currLocation = robot->GetCurrHamsterLocation();
 	double prevDistanceFromWaypoint;
 	double distanceFromWaypoint = CalculateDistanceFromWaypoint(&currLocation, waypoint);
 
@@ -124,7 +124,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 		moveSpeed = CalculateMoveSpeedByDistanceFromWaypoint(distanceFromWaypoint);
 		hamster->sendSpeed(moveSpeed, 0.0);
 
-		currLocation = robot->GetCurrentLocation();
+		currLocation = robot->GetCurrHamsterLocation();
 		prevDistanceFromWaypoint = distanceFromWaypoint;
 		distanceFromWaypoint = CalculateDistanceFromWaypoint(&currLocation, waypoint);
 

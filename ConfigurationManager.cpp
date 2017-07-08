@@ -34,33 +34,6 @@ Location ConfigurationManager::GetGoalLocation()
 	return goalLocation;
 }
 
-Location ConfigurationManager::GetHamsterStartLocation()
-{
-	Location startLocation = GetStartLocation();
-
-	Location hamsterStartLocation =
-	{
-		.x = startLocation.x - (mapWidth / 2),
-		.y = startLocation.y - (mapHeight / 2),
-		.yaw = startLocation.yaw
-	};
-
-	return hamsterStartLocation;
-}
-
-Location ConfigurationManager::GetHamsterGoalLocation()
-{
-	Location goalLocation = GetGoalLocation();
-
-	Location hamsterGoalLocation =
-	{
-		.x = goalLocation.x - (mapWidth / 2),
-		.y = goalLocation.y - (mapHeight / 2)
-	};
-
-	return hamsterGoalLocation;
-}
-
 int ConfigurationManager::GetRobotRadiusInCm()
 {
 	return ROBOT_SIZE_IN_CM;

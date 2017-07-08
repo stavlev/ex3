@@ -24,17 +24,21 @@ class Robot
 {
 private:
 	Hamster * hamster;
+	double hamsterStartX, hamsterStartY;
 	LocalizationManager * localizationManager;
 	double prevX, prevY, prevYaw, currX, currY, currYaw;
 	int inflationRadius;
+	double mapHeight, mapWidth;
 
 public:
-	Robot(Hamster * hamster, LocalizationManager * localizationManager, int inflationRadius);
+	Robot(
+		Hamster * hamster, LocalizationManager * localizationManager, int inflationRadius,
+		double mapHeight, double mapWidth);
 	void Initialize(Location startLocation);
 	double GetDeltaX() const;
 	double GetDeltaY() const;
 	double GetDeltaYaw() const;
-	Location GetCurrentLocation(bool scaleToCm = true);
+	Location GetCurrHamsterLocation(bool scaleToCm = true);
 	void UpdateLocation();
 	virtual ~Robot();
 };
