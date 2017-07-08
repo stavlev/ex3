@@ -34,7 +34,7 @@ public:
 	double GetDeltaX() const;
 	double GetDeltaY() const;
 	double GetDeltaYaw() const;
-	Location GetCurrentLocation();
+	Location GetCurrentLocation(bool scaleToCm = true);
 	void UpdateLocation();
 	virtual ~Robot();
 };

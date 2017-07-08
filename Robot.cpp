@@ -29,7 +29,7 @@ void Robot::Initialize(Location startLocation)
 	sleep(3);
 	hamster->setInitialPose(initialPose);
 
-	Location currLocation = GetCurrentLocation();
+	Location currLocation = GetCurrentLocation(false);
 	double distanceFromInitialPose =
 		sqrt(pow(startLocation.x - currLocation.x, 2) +
 			 pow(startLocation.y - currLocation.y, 2));
@@ -39,7 +39,7 @@ void Robot::Initialize(Location startLocation)
 	{
 		usleep(10);
 
-		currLocation = GetCurrentLocation();
+		currLocation = GetCurrentLocation(false);
 		distanceFromInitialPose =
 			sqrt(pow(startLocation.x - currLocation.x, 2) +
 				 pow(startLocation.y- currLocation.y, 2));
@@ -65,7 +65,7 @@ double Robot::GetDeltaYaw() const
 	return currYaw - prevYaw;
 }
 
-Location Robot::GetCurrentLocation()
+Location Robot::GetCurrentLocation(bool scaleToCm /* = true*/)
 {
 	/*Particle * topParticle = localizationManager->GetTopParticle();
 
@@ -78,6 +78,13 @@ Location Robot::GetCurrentLocation()
 
 	Pose currPose = hamster->getPose();
 
+	double poseX = currPose.getX();
+	double poseY = currPose.getY();
+	double poseYaw = currPose.getHeading();
+
+	double currX = scaleToCm ? (poseX * 100) : (poseX);
+	double currY = scaleToCm ? (poseY * 100) : (poseY);
+
 	double currYaw = currPose.getHeading();
 
 	if (currYaw < 0)
@@ -89,7 +96,7 @@ Location Robot::GetCurrentLocation()
 		currYaw -= 360;
 	}
 
-	Location currLocation = { .x = currPose.getX() * 100, .y = currPose.getY() * 100, .yaw = currYaw };
+	Location currLocation = { .x = currX, .y = currY, .yaw = currYaw };
 
 	return currLocation;
 }

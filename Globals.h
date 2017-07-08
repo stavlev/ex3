@@ -10,15 +10,17 @@
 
 #define ROBOT_SIZE_IN_CM 20
 
-/*
+
 #define X_START 470
 #define Y_START 470
-#define YAW_START 120
-*/
+//#define YAW_START 120
+#define YAW_START 0
 
+/*
 #define X_START 512
 #define Y_START 512
 #define YAW_START 0
+*/
 
 /*
 #define X_GOAL 655

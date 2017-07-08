@@ -54,15 +54,15 @@ int main()
 		Location currWaypoint;
 		double deltaX = 0, deltaY = 0, deltaYaw = 0;
 
-		movementManager.MoveTo(&robot, &hamsterStartLocation);
-		robot.UpdateLocation();
+		/*movementManager.MoveTo(&robot, &hamsterStartLocation);
+		robot.UpdateLocation();*/
 
 		while (hamster->isConnected())
 		{
 			try
 			{
-				/*displayManager.PrintRouteCvMat();
-				sleep(10);*/
+				displayManager.PrintRouteCvMat();
+				/*sleep(20);
 
 				while (waypointIndex < numOfWaypoints)
 				{
@@ -77,7 +77,7 @@ int main()
 
 					robot.UpdateLocation();
 
-					/*deltaX = robot.GetDeltaX();
+					deltaX = robot.GetDeltaX();
 					deltaY = robot.GetDeltaY();
 					deltaYaw = robot.GetDeltaYaw();
 
@@ -85,13 +85,13 @@ int main()
 
 					localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);
 					displayManager.PrintRouteCvMat(localizationManager.GetParticles());
-					localizationManager.PrintParticles();*/
+					localizationManager.PrintParticles();
 				}
 
 				movementManager.StopMoving();
 				cout << "Hamster has reached its destination!" << endl;
 
-				return 0;
+				return 0;*/
 			}
 			catch (const HamsterAPI::HamsterError & message_error)
 			{
