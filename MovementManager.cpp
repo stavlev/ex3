@@ -9,6 +9,11 @@
 #define MIN_TURN_SPEED 0.1
 #define MAX_TURN_SPEED 0.2
 
+// Minimum time to wait between changing the wheels angle,
+// or else Hamster will not have the chance to complete its
+// turning and would turn in the opposite direction again
+#define WHEELS_ANGLE_CHANGE_WAIT_TIME 5
+
 #define TURN_ANGLE 45.0
 #define leftTurnAngle()		TURN_ANGLE
 #define rightTurnAngle()	-TURN_ANGLE
@@ -50,10 +55,14 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 	PrintBeforeTurning(currLocation, waypoint, currYaw, destYaw);
 
+	string directionName;
+	double turnSpeed;
 	double prevDeltaYaw;
 	double currDeltaYaw = fabs(destYaw - currYaw);
 
 	float wheelsAngle = GetDirectionToMoveIn(currYaw, destYaw);
+	bool wheelsAngleRecentlyChanged = false;
+	clock_t wheelsAngleChangeTime;
 
 	bool locationChanged = true;
 
@@ -63,7 +72,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 		prevDeltaYaw = currDeltaYaw;
 		currDeltaYaw = fabs(destYaw - currYaw);
 
-		double turnSpeed = CalculateTurnSpeedByDeltaYaw(currDeltaYaw);
+		turnSpeed = CalculateTurnSpeedByDeltaYaw(currDeltaYaw, wheelsAngleRecentlyChanged);
 		hamster->sendSpeed(turnSpeed, wheelsAngle);
 
 		prevLocation = currLocation;
@@ -77,28 +86,43 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 		if (locationChanged)
 		{
-			string directionName = wheelsAngle == leftTurnAngle() ? "Left" : "Right";
+			directionName = wheelsAngle == leftTurnAngle() ? "Left" : "Right";
 			PrintAfterTurning(directionName, currLocation, currYaw, currDeltaYaw, turnSpeed);
+		}
 
-			// Check if the robot accidentally missed the destination yaw, and if it did -
-			// try fixing it by turning in the opposite direction
-			if (prevDeltaYaw < currDeltaYaw)
+		if (wheelsAngleRecentlyChanged)
+		{
+			double secondsSinceWheelsAngleChanged =
+				(clock() - wheelsAngleChangeTime) / CLOCKS_PER_SEC ;
+
+			if (secondsSinceWheelsAngleChanged > WHEELS_ANGLE_CHANGE_WAIT_TIME)
 			{
-				wheelsAngle = -wheelsAngle;
+				wheelsAngleRecentlyChanged = false;
 			}
 		}
+		else if (prevDeltaYaw < currDeltaYaw)
+		{
+			// If the robot accidentally missed the destination yaw, try
+			// fixing it by turning in the opposite direction
+			HamsterAPI::Log::i("Client", "Missed destination yaw, turning to the opposite direction");
+
+			wheelsAngle = -wheelsAngle;
+
+			wheelsAngleRecentlyChanged = true;
+			wheelsAngleChangeTime = clock();
+		}
 	}
+
+	PrintAfterTurning(directionName, currLocation, currYaw, currDeltaYaw, turnSpeed);
 
 	currLocation = robot->GetCurrentLocation();
 	double distanceFromDest = CalculateDistanceFromWaypoint(&currLocation, waypoint);
 	double prevDistanceFromDest;
 
-	HamsterAPI::Log::i("Client", "Destination yaw reached, moving forward towards waypoint\n");
+	HamsterAPI::Log::i("Client", "Reached destination yaw, moving forward towards waypoint");
 
 	while (distanceFromDest > DISTANCE_FROM_WAYPOINT_TOLERANCE)
 	{
-		string directionName;
-
 		// Check if the robot accidentally missed the current destination, and if it did -
 		// try fixing it by moving backwards in the same angle
 		if (distanceFromDest > prevDistanceFromDest)
@@ -184,8 +208,17 @@ double MovementManager::CalculateDistanceFromWaypoint(Location * currLocation, L
 // Calculate the turn speed according to the current delta yaw in a circular way (0 = 360),
 // so that the robot would turn slower as it approaches the destination yaw in order not
 // to miss it
-double MovementManager::CalculateTurnSpeedByDeltaYaw(double currDeltaYaw) const
+double MovementManager::CalculateTurnSpeedByDeltaYaw(
+	double currDeltaYaw, bool didWheelsAngleRecentlyChange) const
 {
+	// In case the wheels angle recently changed, return a very low turn speed in
+	// order to increase Hamster's chance to turn back close enough to the missed
+	// destination yaw
+	if (didWheelsAngleRecentlyChange)
+	{
+		return (MIN_TURN_SPEED / 2);
+	}
+
 	int numOfSpeedClasses = 5;
 	double diffConst = 2 * ((double)(MAX_TURN_SPEED - MIN_TURN_SPEED) / (numOfSpeedClasses - 1));
 
