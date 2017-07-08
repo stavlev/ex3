@@ -9,8 +9,9 @@
 #define MIN_TURN_SPEED 0.1
 #define MAX_TURN_SPEED 0.2
 
-#define LEFT 45.0
-#define RIGHT -45.0
+#define TURN_ANGLE 45.0
+#define leftTurnAngle()		TURN_ANGLE
+#define rightTurnAngle()	-TURN_ANGLE
 
 MovementManager::MovementManager(HamsterAPI::Hamster * hamster)
 {
@@ -45,7 +46,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 	double currYaw = currLocation.yaw;
 	double destYawInRad = atan2(deltaY, deltaX);
 	double destYawInDegrees = radiansToDegrees(destYawInRad);
-	double destYaw = GetAdjustedYaw(destYawInDegrees);
+	const double destYaw = GetAdjustedYaw(destYawInDegrees);
 
 	std::stringstream stringStream;
 	string message;
@@ -61,16 +62,21 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 	message = stringStream.str();
 	HamsterAPI::Log::i("Client", message);
 
-	float direction = GetDirectionToMoveIn(currYaw, destYaw);
+	double prevDeltaYaw;
+	double currDeltaYaw = fabs(destYaw - currYaw);
+
+	float wheelsAngle = GetDirectionToMoveIn(currYaw, destYaw);
 
 	bool locationChanged = true;
 
 	// Keep turning in the chosen direction while the robot's angle is different than the destination angle
 	while (abs(destYaw - currYaw) > YAW_TOLERANCE)
 	{
-		double deltaYaw = fabs(destYaw - currYaw);
-		double turnSpeed = CalculateTurnSpeedByDeltaYaw(deltaYaw);
-		hamster->sendSpeed(turnSpeed, direction);
+		prevDeltaYaw = currDeltaYaw;
+		currDeltaYaw = fabs(destYaw - currYaw);
+
+		double turnSpeed = CalculateTurnSpeedByDeltaYaw(currDeltaYaw);
+		hamster->sendSpeed(turnSpeed, wheelsAngle);
 
 		prevLocation = currLocation;
 		currLocation = robot->GetCurrentLocation();
@@ -83,16 +89,23 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 		if (locationChanged)
 		{
-			string directionName = direction == LEFT ? "Left" : "Right";
+			string directionName = wheelsAngle == leftTurnAngle() ? "Left" : "Right";
 			stringStream.flush();
 			stringStream << "Moved " << directionName << " to: " <<
 				"x = " << currLocation.x <<
 				", y = " << currLocation.y <<
 				", yaw = " << currYaw <<
-				", deltaYaw = " << fabs(destYaw - currYaw) <<
+				", deltaYaw = " << currDeltaYaw <<
 				" (turnSpeed: " << turnSpeed << ")" << endl;
 			message = stringStream.str();
 			HamsterAPI::Log::i("Client", message);
+
+			// Check if the robot accidentally missed the destination yaw, and if it did -
+			// try fixing it by turning in the opposite direction
+			if (prevDeltaYaw < currDeltaYaw)
+			{
+				wheelsAngle = -wheelsAngle;
+			}
 		}
 	}
 
@@ -104,20 +117,20 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 	while (distanceFromDest > DISTANCE_FROM_WAYPOINT_TOLERANCE)
 	{
-		string direction;
+		string directionName;
 
 		// Check if the robot accidentally missed the current destination, and if it did -
 		// try fixing it by moving backwards in the same angle
 		if (distanceFromDest > prevDistanceFromDest)
 		{
 			MoveBackwards();
-			direction = "Backwards";
+			directionName = "Backwards";
 		}
 		else
 		{
 			// Once the destination yaw is correct - keep moving forward in this direction
 			MoveForward();
-			direction = "Forward";
+			directionName = "Forward";
 		}
 
 		usleep(5000);
@@ -131,7 +144,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 		if (locationChanged)
 		{
 			stringStream.flush();
-			stringStream << "Moved " << direction << ", current location: " <<
+			stringStream << "Moved " << directionName << ", current location: " <<
 				"x = " << currLocation.x <<
 				", y = " << currLocation.y <<
 				", yaw = " << currYaw <<
@@ -156,22 +169,22 @@ float MovementManager::GetDirectionToMoveIn(double currYaw, double destYaw)
 	{
 		if (360 - currYaw + destYaw < currYaw - destYaw)
 		{
-			return LEFT;
+			return leftTurnAngle();
 		}
 		else
 		{
-			return RIGHT;
+			return rightTurnAngle();
 		}
 	}
 	else
 	{
 		if (360 - destYaw + currYaw < destYaw - currYaw)
 		{
-			return RIGHT;
+			return rightTurnAngle();
 		}
 		else
 		{
-			return LEFT;
+			return leftTurnAngle();
 		}
 	}
 }
