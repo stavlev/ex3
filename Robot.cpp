@@ -45,6 +45,7 @@ void Robot::Initialize(Location startLocation)
 	}
 
 	//localizationManager->InitParticles();
+
 	UpdateLocation();
 }
 
@@ -75,7 +76,19 @@ Location Robot::GetCurrentLocation()
 	};*/
 
 	Pose currPose = hamster->getPose();
-	Location currLocation = { .x = currPose.getX(), .y = currPose.getY(), .yaw = currPose.getHeading() };
+
+	double currYaw = currPose.getHeading();
+
+	if (currYaw < 0)
+	{
+		currYaw += 360;
+	}
+	else if (currYaw > 360)
+	{
+		currYaw -= 360;
+	}
+
+	Location currLocation = { .x = currPose.getX(), .y = currPose.getY(), .yaw = currYaw };
 
 	return currLocation;
 }

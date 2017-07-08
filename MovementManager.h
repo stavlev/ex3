@@ -19,18 +19,14 @@ class MovementManager
 {
 private:
 	HamsterAPI::Hamster * hamster;
-	void Move(float moveSpeed, string direction);
-	void Turn(float wheelsAngle, string direction, bool shouldPrint);
-	string GetDirectionToMoveIn(double currYaw, double destYaw);
+	float GetDirectionToMoveIn(double currYaw, double destYaw);
 	double GetDistanceFromWaypoint(Location * currLocation, Location * waypoint);
-	double GetAdjustedYaw(double yaw);
+	double GetAdjustedYaw(double yawToAdjust);
 
 public:
 	MovementManager(HamsterAPI::Hamster * hamster);
 	void MoveTo(Robot * robot, Location * destination);
 	void MoveForward();
-	void TurnLeft(bool shouldPrint);
-	void TurnRight(bool shouldPrint);
 	void MoveBackwards();
 	void StopMoving() ;
 	virtual ~MovementManager();

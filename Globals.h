@@ -21,6 +21,7 @@
 #define YAW_TOLERANCE 10
 
 #define numericCharToInt(numChar) (numChar - '0')
+
 #define degreesToRadians(angleDegrees) (angleDegrees * M_PI / 180.0)
 #define radiansToDegrees(angleRadians) (angleRadians * 180.0 / M_PI)
 
