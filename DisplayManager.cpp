@@ -28,12 +28,25 @@ DisplayManager::DisplayManager(Grid * grid, string plannedRoute, vector<Location
 	this->numOfWaypoints = numOfWaypoints;
 }
 
-void DisplayManager::PrintWaypoints()
+void DisplayManager::PrintWaypoints(bool convertToHamsterLocation)
 {
+	Location currWaypoint;
+	double waypointX, waypointY;
+
 	for (int i = 0; i < numOfWaypoints; i++)
 	{
-		Location currWaypoint = waypoints.at(i);
-		cout << "Waypoint " << i + 1 << ": " << "x = " << currWaypoint.x << ", y = " << currWaypoint.y << endl;
+		currWaypoint = waypoints.at(i);
+
+		waypointX = currWaypoint.x;
+		waypointY = currWaypoint.y;
+
+		if (convertToHamsterLocation)
+		{
+			waypointX -= (width / 2);
+			waypointY -= (height / 2);
+		}
+
+		cout << "Waypoint " << i + 1 << ": " << "x = " << waypointX << ", y = " << waypointY << endl;
 	}
 }
 

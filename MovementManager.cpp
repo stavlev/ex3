@@ -77,8 +77,9 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 		if (locationChanged)
 		{
+			string directionName = direction == LEFT ? "Left" : "Right";
 			stringStream.flush();
-			stringStream << "Moved to: " <<
+			stringStream << "Moved " << directionName << " to: " <<
 				"x = " << currLocation.x <<
 				", y = " << currLocation.y <<
 				", yaw = " << currYaw << endl <<

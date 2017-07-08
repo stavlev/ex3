@@ -1,11 +1,11 @@
 #include "math.h"
+#include "ConfigurationManager.h"
 #include "PathPlanner.h"
 #include "Map.h"
 #include "WaypointsManager.h"
 #include "DisplayManager.h"
 #include "Robot.h"
 #include "MovementManager.h"
-#include "Globals.h"
 
 int main()
 {
@@ -15,10 +15,15 @@ int main()
 		sleep(3);
 		OccupancyGrid occupancyGrid = hamster->getSLAMMap();
 
-		Location startLocation = { .x = X_START, .y = Y_START, .yaw = YAW_START };
-		Location goalLocation = { .x = X_GOAL, .y = Y_GOAL };
+		double mapHeight = occupancyGrid.getHeight();
+		double mapWidth = occupancyGrid.getWidth();
 
-		Map map = Map(&occupancyGrid, ROBOT_SIZE_IN_CM, startLocation, goalLocation);
+		ConfigurationManager configurationManager(mapHeight, mapWidth);
+		Location startLocation = configurationManager.GetStartLocation();
+		Location goalLocation = configurationManager.GetGoalLocation();
+		int robotRadiusInCm = configurationManager.GetRobotRadiusInCm();
+
+		Map map = Map(&occupancyGrid, robotRadiusInCm, startLocation, goalLocation);
 		Grid grid = map.grid;
 
 		LocalizationManager localizationManager(occupancyGrid, hamster);
@@ -35,16 +40,15 @@ int main()
 		// Print the map including the planned route and chosen waypoints
 		DisplayManager displayManager = DisplayManager(&grid, plannedRoute, &waypoints, numOfWaypoints);
 		//displayManager.PrintRouteCvMat();
-		displayManager.PrintWaypoints();
+		displayManager.PrintWaypoints(true);
 
 		MovementManager movementManager(hamster);
 
-		robot.Initialize(startLocation);
+		Location hamsterStartLocation = configurationManager.GetHamsterStartLocation();
+		robot.Initialize(hamsterStartLocation);
 
 		int waypointIndex = 0;
 		/*double deltaX = 0, deltaY = 0, deltaYaw = 0;*/
-
-		Location currRobotLocation;
 
 		while (hamster->isConnected())
 		{
@@ -53,6 +57,11 @@ int main()
 				while (waypointIndex < numOfWaypoints)
 				{
 					Location currWaypoint = waypoints.at(waypointIndex);
+
+					// Convert cv::Mat location to HamsterAPI::Hamster location
+					currWaypoint.x -= (mapWidth / 2);
+					currWaypoint.y -= (mapHeight / 2);
+
 					movementManager.MoveTo(&robot, &currWaypoint);
 					robot.UpdateLocation();
 

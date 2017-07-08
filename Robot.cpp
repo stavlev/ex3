@@ -41,7 +41,7 @@ void Robot::Initialize(Location startLocation)
 		currLocation = GetCurrentLocation();
 		distanceFromInitialPose =
 			sqrt(pow(startLocation.x - currLocation.x, 2) +
-				 pow(startLocation.y - currLocation.y, 2));
+				 pow(startLocation.y- currLocation.y, 2));
 	}
 
 	//localizationManager->InitParticles();

@@ -41,7 +41,7 @@ private:
 
 public:
 	DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints, int numOfWaypoints);
-	void PrintWaypoints();
+	void PrintWaypoints(bool convertToHamsterLocation);
 	void PrintRouteCvMat();
 	void PrintRouteCvMat(vector<Particle *> particles);
 	virtual ~DisplayManager();
