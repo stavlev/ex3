@@ -54,6 +54,7 @@ void DisplayManager::PrintRouteCvMat()
 {
 	InitMapWithRoute();
 
+	sleep(1);
 	cv::namedWindow("OccupancyGrid-view-route");
 	cv::imshow("OccupancyGrid-view-route", routeCvMat);
 	cv::waitKey(1);
@@ -63,6 +64,7 @@ void DisplayManager::PrintRouteCvMat(vector<Particle *> particles)
 {
 	InitMapWithParticles(particles);
 
+	sleep(1);
 	cv::namedWindow("OccupancyGrid-view-particles");
 	cv::imshow("OccupancyGrid-view-particles", routeCvMat);
 	cv::waitKey(1);
@@ -129,7 +131,7 @@ void DisplayManager::InitMapWithRoute()
 		(mapFromPlannedRoute.at(y)).at(x) = GOAL;
 
 		// Iterate through all waypoints and mark them on the map
-		for (int i = 0; i < waypoints.size(); i++)
+		for (int i = 0; i < numOfWaypoints; i++)
 		{
 			Location currWaypoint = waypoints.at(i);
 
@@ -318,6 +320,6 @@ void DisplayManager::ColorPixelByParticles(int currentCellValue, int i, int j)
 
 DisplayManager::~DisplayManager()
 {
-	cv::destroyWindow("OccupancyGrid-view-route");
-	cv::destroyWindow("OccupancyGrid-view-particles");
+	/*cv::destroyWindow("OccupancyGrid-view-route");
+	cv::destroyWindow("OccupancyGrid-view-particles");*/
 }

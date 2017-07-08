@@ -12,21 +12,24 @@ int main()
 	try
 	{
 		Hamster * hamster = new HamsterAPI::Hamster(1);
+
 		sleep(3);
 		OccupancyGrid occupancyGrid = hamster->getSLAMMap();
 
+		sleep(1);
 		double mapHeight = occupancyGrid.getHeight();
 		double mapWidth = occupancyGrid.getWidth();
+		double mapResolution = occupancyGrid.getResolution();
 
 		ConfigurationManager configurationManager(mapHeight, mapWidth);
 		Location startLocation = configurationManager.GetStartLocation();
 		Location goalLocation = configurationManager.GetGoalLocation();
 		int robotRadiusInCm = configurationManager.GetRobotRadiusInCm();
 
-		Map map = Map(&occupancyGrid, robotRadiusInCm, startLocation, goalLocation);
+		Map map = Map(&occupancyGrid, robotRadiusInCm, startLocation, goalLocation, mapHeight, mapWidth);
 		Grid grid = map.grid;
 
-		LocalizationManager localizationManager(occupancyGrid, hamster);
+		LocalizationManager localizationManager(hamster, occupancyGrid, mapHeight, mapWidth, mapResolution);
 		Robot robot(hamster, &localizationManager, map.inflationRadius);
 
 		PathPlanner pathPlanner = PathPlanner(&grid);
@@ -48,21 +51,31 @@ int main()
 		robot.Initialize(hamsterStartLocation);
 
 		int waypointIndex = 0;
-		/*double deltaX = 0, deltaY = 0, deltaYaw = 0;*/
+		Location currWaypoint;
+		double deltaX = 0, deltaY = 0, deltaYaw = 0;
 
 		while (hamster->isConnected())
 		{
 			try
 			{
+				Location sheker = {.x = 50.0, .y = 50.0, .yaw = 0};
+				movementManager.MoveTo(&robot, &sheker);
+				robot.UpdateLocation();
+
+				/*displayManager.PrintRouteCvMat();
+				sleep(10);*/
+
 				while (waypointIndex < numOfWaypoints)
 				{
-					Location currWaypoint = waypoints.at(waypointIndex);
+					currWaypoint = waypoints.at(waypointIndex);
 
 					// Convert cv::Mat location to HamsterAPI::Hamster location
 					currWaypoint.x -= (mapWidth / 2);
 					currWaypoint.y -= (mapHeight / 2);
 
 					movementManager.MoveTo(&robot, &currWaypoint);
+					waypointIndex++;
+
 					robot.UpdateLocation();
 
 					/*deltaX = robot.GetDeltaX();
@@ -70,12 +83,10 @@ int main()
 					deltaYaw = robot.GetDeltaYaw();
 
 					cout << "Real values:" << " deltaX : " << deltaX << " deltaY: " << deltaY << " deltaYaw : " << deltaYaw << endl;
-*/
-					//localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);
-					//displayManager.PrintRouteCvMat(localizationManager.GetParticles());
-					//localizationManager.PrintParticles();
 
-					waypointIndex++;
+					localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);
+					displayManager.PrintRouteCvMat(localizationManager.GetParticles());
+					localizationManager.PrintParticles();*/
 				}
 
 				movementManager.StopMoving();

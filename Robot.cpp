@@ -88,7 +88,7 @@ Location Robot::GetCurrentLocation()
 		currYaw -= 360;
 	}
 
-	Location currLocation = { .x = currPose.getX(), .y = currPose.getY(), .yaw = currYaw };
+	Location currLocation = { .x = currPose.getX() * 100, .y = currPose.getY() * 100, .yaw = currYaw };
 
 	return currLocation;
 }

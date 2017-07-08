@@ -35,7 +35,9 @@ private:
 	void UpdateParticle(Particle * particleToUpdate, Particle * betterParticle);
 
 public:
-	LocalizationManager(const OccupancyGrid & ogrid, Hamster * hamster);
+	LocalizationManager(
+			Hamster * hamster, OccupancyGrid & ogrid,
+			double mapHeight, double mapWidth, double mapResolution);
 	void InitParticles();
 	vector<Particle *> GetParticles() const;
 	Particle * GetTopParticle() const;

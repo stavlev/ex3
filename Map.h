@@ -36,7 +36,9 @@ public:
 	Grid grid;
 	int inflationRadius;
 	Map();
-	Map(HamsterAPI::OccupancyGrid * map, int robotSizeInCm, Location startLocation, Location goalLocation);
+	Map(HamsterAPI::OccupancyGrid * map, int robotSizeInCm,
+		Location startLocation, Location goalLocation,
+		double mapHeight, double mapWidth);
 	virtual ~Map();
 };
 

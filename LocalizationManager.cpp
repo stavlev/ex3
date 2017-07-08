@@ -9,12 +9,12 @@
 #define ADJACENT_PARTICLE_DESTINATION 1
 #define GET_BACK_TIMES 20
 
-LocalizationManager::LocalizationManager(const OccupancyGrid & ogrid, Hamster * hamster) :
-	ogrid(ogrid), hamster(hamster)
+LocalizationManager::LocalizationManager(
+	Hamster * hamster, OccupancyGrid & ogrid,
+	double mapHeight, double mapWidth, double mapResolution) :
+		hamster(hamster), ogrid(ogrid),
+		ogridHeight(mapHeight), ogridWidth(mapWidth), ogridResolution(mapResolution)
 {
-	ogridHeight = ogrid.getHeight();
-	ogridWidth = ogrid.getWidth();
-	ogridResolution = ogrid.getResolution();
 }
 
 void LocalizationManager::InitParticles()

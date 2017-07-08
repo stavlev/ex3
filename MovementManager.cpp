@@ -5,7 +5,7 @@
 #include <time.h>
 #include <sstream>
 
-#define MOVE_SPEED 0.4
+#define MOVE_SPEED 0.1
 #define TURN_SPEED 0.2
 
 #define LEFT 45.0
@@ -31,6 +31,8 @@ void MovementManager::StopMoving()
 	hamster->sendSpeed(0.0, 0.0);
 }
 
+// The parameter waypoint should be according to Hamster's coordinate system
+// (in which (0,0) is at the center of the map, NOT at the top left corner)
 void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 {
 	Location prevLocation;
@@ -41,7 +43,8 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 	double currYaw = currLocation.yaw;
 	double destYawInRad = atan2(deltaY, deltaX);
-	double destYaw = GetAdjustedYaw(radiansToDegrees(destYawInRad));
+	double destYawInDegrees = radiansToDegrees(destYawInRad);
+	double destYaw = GetAdjustedYaw(destYawInDegrees);
 
 	std::stringstream stringStream;
 	string message;
@@ -53,7 +56,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 		"current waypoint: " <<
 		"x = " << waypoint->x <<
 		", y = " << waypoint->y << endl <<
-		"movement angle: " << destYaw << endl;
+		"destYaw: " << destYaw << endl;
 	message = stringStream.str();
 	HamsterAPI::Log::i("Client", message);
 
@@ -82,27 +85,42 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 			stringStream << "Moved " << directionName << " to: " <<
 				"x = " << currLocation.x <<
 				", y = " << currLocation.y <<
-				", yaw = " << currYaw << endl <<
-				"destYaw =  " << destYaw << ", currYaw = " << currYaw <<
-				", destYaw - currentYaw = " << destYaw - currYaw << endl;
+				", yaw = " << currYaw <<
+				", deltaYaw = " << abs(destYaw - currYaw) << endl;
 			message = stringStream.str();
 			HamsterAPI::Log::i("Client", message);
 		}
 	}
 
 	currLocation = robot->GetCurrentLocation();
-	double distanceFromDestination = GetDistanceFromWaypoint(&currLocation, waypoint);
+	double distanceFromDest = GetDistanceFromWaypoint(&currLocation, waypoint);
+	double prevDistanceFromDest;
 
 	HamsterAPI::Log::i("Client", "Destination yaw reached, moving forward towards waypoint\n");
 
-	while (distanceFromDestination > DISTANCE_FROM_WAYPOINT_TOLERANCE)
+	while (distanceFromDest > DISTANCE_FROM_WAYPOINT_TOLERANCE)
 	{
 		// Once the destination yaw is correct - keep moving forward in this direction
 		MoveForward();
-		usleep(500);
+		usleep(5000);
 
 		currLocation = robot->GetCurrentLocation();
-		distanceFromDestination = GetDistanceFromWaypoint(&currLocation, waypoint);
+		prevDistanceFromDest = distanceFromDest;
+		distanceFromDest = GetDistanceFromWaypoint(&currLocation, waypoint);
+
+		locationChanged = prevDistanceFromDest != distanceFromDest;
+
+		if (locationChanged)
+		{
+			stringStream.flush();
+			stringStream << "Moved Forward, current location: " <<
+				"x = " << currLocation.x <<
+				", y = " << currLocation.y <<
+				", yaw = " << currYaw <<
+				", distanceFromDest =  " << distanceFromDest << endl;
+			message = stringStream.str();
+			HamsterAPI::Log::i("Client", message);
+		}
 	}
 
 	stringStream.flush();
@@ -111,6 +129,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 	HamsterAPI::Log::i("Client", message);
 
 	StopMoving();
+	return;
 }
 
 float MovementManager::GetDirectionToMoveIn(double currYaw, double destYaw)

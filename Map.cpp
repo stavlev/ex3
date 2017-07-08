@@ -9,15 +9,16 @@ Map::Map()
 }
 
 Map::Map(HamsterAPI::OccupancyGrid * map, int robotSizeInCm,
-		 Location startLocation, Location goalLocation)
+		 Location startLocation, Location goalLocation,
+		 double mapHeight, double mapWidth)
 {
 	this->map = *map;
 	this->robotSizeInCm = robotSizeInCm;
 	this->startLocation = startLocation;
 	this->goalLocation = goalLocation;
 
-	mapHeight = map->getHeight();
-	mapWidth = map->getWidth();
+	this->mapHeight = mapHeight;
+	this->mapWidth = mapWidth;
 
 	// Initialize the occupation map - a boolean matrix indicating for
 	// each cell whether or not it is occupied
