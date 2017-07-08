@@ -24,9 +24,10 @@ private:
 	double GetAdjustedYaw(double yawToAdjust) const;
 	double CalculateDistanceFromWaypoint(Location * currLocation, Location * waypoint) const;
 	double CalculateTurnSpeedByDeltaYaw(double deltaYaw, bool didWheelsAngleRecentlyChange) const;
+	double CalculateMoveSpeedByDistanceFromWaypoint(double distanceFromWaypoint);
 	void PrintBeforeTurning(Location currLocation, Location * waypoint, double currYaw, double destYaw);
 	void PrintAfterTurning(string directionName, Location currLocation, double currYaw, double currDeltaYaw, double turnSpeed);
-	void PrintAfterMoving(string directionName, Location currLocation, double currYaw, double distanceFromDest);
+	void PrintAfterMoving(string directionName, Location currLocation, double currYaw, double distanceFromWaypoint, double moveSpeed);
 	void PrintAfterWaypointIsReached(Location currLocation, Location * waypoint);
 
 public:

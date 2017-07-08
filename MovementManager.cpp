@@ -5,13 +5,14 @@
 #include <time.h>
 #include <sstream>
 
-#define MOVE_SPEED 0.2
+#define MAX_MOVE_SPEED 0.5
+
 #define MIN_TURN_SPEED 0.1
 #define MAX_TURN_SPEED 0.2
 
 #define TURN_ANGLE 45.0
 
-#define YAW_TOLERANCE 1.1
+#define YAW_TOLERANCE 1
 #define DISTANCE_FROM_WAYPOINT_TOLERANCE 10
 
 // Minimum time to wait between changing the wheels angle,
@@ -19,15 +20,8 @@
 // in the chosen angle and would turn in the opposite direction again
 #define WHEELS_ANGLE_CHANGE_WAIT_TIME 5
 
-// Minimum time to wait between changing the movement direction,
-// or else Hamster will not have the chance to complete its movement
-// in the chosen direction and would move in the opposite direction again
-#define MOVING_DIR_CHANGE_WAIT_TIME 10
-
 #define leftTurnAngle()		TURN_ANGLE
 #define rightTurnAngle()	-TURN_ANGLE
-#define forwardMoveSpeed()		MOVE_SPEED
-#define backwardsMoveSpeed()	-MOVE_SPEED
 
 MovementManager::MovementManager(HamsterAPI::Hamster * hamster)
 {
@@ -116,56 +110,29 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 	PrintAfterTurning(directionName, currLocation, currYaw, currDeltaYaw, turnSpeed);
 
+	double moveSpeed;
+
 	currLocation = robot->GetCurrentLocation();
-	double distanceFromWaypoint = CalculateDistanceFromWaypoint(&currLocation, waypoint);
 	double prevDistanceFromWaypoint;
+	double distanceFromWaypoint = CalculateDistanceFromWaypoint(&currLocation, waypoint);
 
 	HamsterAPI::Log::i("Client", "Reached destination yaw, moving forward towards waypoint");
 
-	float directionSpeed = forwardMoveSpeed();
-	bool movingDirRecentlyChanged = false;
-	clock_t movingDirChangeTime;
-
-	// Keep moving in the chosen direction while the robot's distnace from the waypoint is
-	// not small enough
+	// Keep moving in the chosen direction while the robot's is not too close to the waypoint
 	while (distanceFromWaypoint > DISTANCE_FROM_WAYPOINT_TOLERANCE)
 	{
-		currLocation = robot->GetCurrentLocation();
+		moveSpeed = CalculateMoveSpeedByDistanceFromWaypoint(distanceFromWaypoint);
+		hamster->sendSpeed(moveSpeed, 0.0);
 
+		currLocation = robot->GetCurrentLocation();
 		prevDistanceFromWaypoint = distanceFromWaypoint;
 		distanceFromWaypoint = CalculateDistanceFromWaypoint(&currLocation, waypoint);
-
-		float movingSpeed = movingDirRecentlyChanged ? (directionSpeed / 2) : directionSpeed;
-		hamster->sendSpeed(movingSpeed, 0.0);
 
 		locationChanged = prevDistanceFromWaypoint != distanceFromWaypoint;
 
 		if (locationChanged)
 		{
-			directionName = directionSpeed > 0 ? "Forward" : "Backwards";
-			PrintAfterMoving(directionName, currLocation, currYaw, distanceFromWaypoint);
-		}
-
-		if (movingDirRecentlyChanged)
-		{
-			double secondsSinceMovingDirChanged =
-				(clock() - movingDirChangeTime) / CLOCKS_PER_SEC ;
-
-			if (secondsSinceMovingDirChanged > MOVING_DIR_CHANGE_WAIT_TIME)
-			{
-				movingDirRecentlyChanged = false;
-			}
-		}
-		else if (prevDistanceFromWaypoint < distanceFromWaypoint)
-		{
-			// If the robot accidentally missed the current waypoint, try
-			// fixing it by moving backwards in the same angle
-			HamsterAPI::Log::i("Client", "Missed waypoint, moving to the opposite direction");
-
-			directionSpeed = -directionSpeed;
-
-			movingDirRecentlyChanged = true;
-			movingDirChangeTime = clock();
+			PrintAfterMoving("Forward", currLocation, currYaw, distanceFromWaypoint, moveSpeed);
 		}
 	}
 
@@ -261,6 +228,20 @@ double MovementManager::CalculateTurnSpeedByDeltaYaw(
 	return turnSpeed;
 }
 
+// Calculate the move speed according to the current distance from the waypoint,
+// so that the robot would move slower as it approached the waypoint in order not
+// to miss it
+double MovementManager::CalculateMoveSpeedByDistanceFromWaypoint(double distanceFromWaypoint)
+{
+	if (distanceFromWaypoint > 5 * DISTANCE_FROM_WAYPOINT_TOLERANCE)
+	{
+		return MAX_MOVE_SPEED;
+	}
+
+	double turnSpeed = (double)distanceFromWaypoint / 100;
+	return turnSpeed;
+}
+
 void MovementManager::PrintBeforeTurning(
 	Location currLocation, Location * waypoint, double currYaw, double destYaw)
 {
@@ -295,7 +276,7 @@ void MovementManager::PrintAfterTurning(
 }
 
 void MovementManager::PrintAfterMoving(
-	string directionName, Location currLocation, double currYaw, double distanceFromDest)
+	string directionName, Location currLocation, double currYaw, double distanceFromWaypoint, double moveSpeed)
 {
 	stringStream.flush();
 	string message;
@@ -303,7 +284,8 @@ void MovementManager::PrintAfterMoving(
 		"x = " << currLocation.x <<
 		", y = " << currLocation.y <<
 		", yaw = " << currYaw <<
-		", distanceFromDest =  " << distanceFromDest << endl;
+		", distanceFromWaypoint =  " << distanceFromWaypoint <<
+		" (moveSpeed: " << moveSpeed << ")" << endl;
 	message = stringStream.str();
 	HamsterAPI::Log::i("Client", message);
 }
