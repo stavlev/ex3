@@ -9,28 +9,29 @@
 #define MIN_TURN_SPEED 0.1
 #define MAX_TURN_SPEED 0.2
 
+#define TURN_ANGLE 45.0
+
+#define YAW_TOLERANCE 1.1
+#define DISTANCE_FROM_WAYPOINT_TOLERANCE 10
+
 // Minimum time to wait between changing the wheels angle,
-// or else Hamster will not have the chance to complete its
-// turning and would turn in the opposite direction again
+// or else Hamster will not have the chance to complete its turning
+// in the chosen angle and would turn in the opposite direction again
 #define WHEELS_ANGLE_CHANGE_WAIT_TIME 5
 
-#define TURN_ANGLE 45.0
+// Minimum time to wait between changing the movement direction,
+// or else Hamster will not have the chance to complete its movement
+// in the chosen direction and would move in the opposite direction again
+#define MOVING_DIR_CHANGE_WAIT_TIME 10
+
 #define leftTurnAngle()		TURN_ANGLE
 #define rightTurnAngle()	-TURN_ANGLE
+#define forwardMoveSpeed()		MOVE_SPEED
+#define backwardsMoveSpeed()	-MOVE_SPEED
 
 MovementManager::MovementManager(HamsterAPI::Hamster * hamster)
 {
 	this->hamster = hamster;
-}
-
-void MovementManager::MoveForward()
-{
-	hamster->sendSpeed(MOVE_SPEED, 0.0);
-}
-
-void MovementManager::MoveBackwards()
-{
-	hamster->sendSpeed(-MOVE_SPEED, 0.0);
 }
 
 void MovementManager::StopMoving()
@@ -60,14 +61,14 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 	double prevDeltaYaw;
 	double currDeltaYaw = fabs(destYaw - currYaw);
 
-	float wheelsAngle = GetDirectionToMoveIn(currYaw, destYaw);
+	float wheelsAngle = GetTurningDirection(currYaw, destYaw);
 	bool wheelsAngleRecentlyChanged = false;
 	clock_t wheelsAngleChangeTime;
 
 	bool locationChanged = true;
 
 	// Keep turning in the chosen direction while the robot's angle is different than the destination angle
-	while (abs(destYaw - currYaw) > YAW_TOLERANCE)
+	while (currDeltaYaw > YAW_TOLERANCE)
 	{
 		prevDeltaYaw = currDeltaYaw;
 		currDeltaYaw = fabs(destYaw - currYaw);
@@ -86,7 +87,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 		if (locationChanged)
 		{
-			directionName = wheelsAngle == leftTurnAngle() ? "Left" : "Right";
+			directionName = wheelsAngle > 0 ? "Left" : "Right";
 			PrintAfterTurning(directionName, currLocation, currYaw, currDeltaYaw, turnSpeed);
 		}
 
@@ -116,48 +117,65 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 	PrintAfterTurning(directionName, currLocation, currYaw, currDeltaYaw, turnSpeed);
 
 	currLocation = robot->GetCurrentLocation();
-	double distanceFromDest = CalculateDistanceFromWaypoint(&currLocation, waypoint);
-	double prevDistanceFromDest;
+	double distanceFromWaypoint = CalculateDistanceFromWaypoint(&currLocation, waypoint);
+	double prevDistanceFromWaypoint;
 
 	HamsterAPI::Log::i("Client", "Reached destination yaw, moving forward towards waypoint");
 
-	while (distanceFromDest > DISTANCE_FROM_WAYPOINT_TOLERANCE)
+	float directionSpeed = forwardMoveSpeed();
+	bool movingDirRecentlyChanged = false;
+	clock_t movingDirChangeTime;
+
+	// Keep moving in the chosen direction while the robot's distnace from the waypoint is
+	// not small enough
+	while (distanceFromWaypoint > DISTANCE_FROM_WAYPOINT_TOLERANCE)
 	{
-		// Check if the robot accidentally missed the current destination, and if it did -
-		// try fixing it by moving backwards in the same angle
-		if (distanceFromDest > prevDistanceFromDest)
-		{
-			MoveBackwards();
-			directionName = "Backwards";
-		}
-		else
-		{
-			// Once the destination yaw is correct - keep moving forward in this direction
-			MoveForward();
-			directionName = "Forward";
-		}
-
-		usleep(5000);
-
 		currLocation = robot->GetCurrentLocation();
-		prevDistanceFromDest = distanceFromDest;
-		distanceFromDest = CalculateDistanceFromWaypoint(&currLocation, waypoint);
 
-		locationChanged = prevDistanceFromDest != distanceFromDest;
+		prevDistanceFromWaypoint = distanceFromWaypoint;
+		distanceFromWaypoint = CalculateDistanceFromWaypoint(&currLocation, waypoint);
+
+		float movingSpeed = movingDirRecentlyChanged ? (directionSpeed / 2) : directionSpeed;
+		hamster->sendSpeed(movingSpeed, 0.0);
+
+		locationChanged = prevDistanceFromWaypoint != distanceFromWaypoint;
 
 		if (locationChanged)
 		{
-			PrintAfterMoving(directionName, currLocation, currYaw, distanceFromDest);
+			directionName = directionSpeed > 0 ? "Forward" : "Backwards";
+			PrintAfterMoving(directionName, currLocation, currYaw, distanceFromWaypoint);
+		}
+
+		if (movingDirRecentlyChanged)
+		{
+			double secondsSinceMovingDirChanged =
+				(clock() - movingDirChangeTime) / CLOCKS_PER_SEC ;
+
+			if (secondsSinceMovingDirChanged > MOVING_DIR_CHANGE_WAIT_TIME)
+			{
+				movingDirRecentlyChanged = false;
+			}
+		}
+		else if (prevDistanceFromWaypoint < distanceFromWaypoint)
+		{
+			// If the robot accidentally missed the current waypoint, try
+			// fixing it by moving backwards in the same angle
+			HamsterAPI::Log::i("Client", "Missed waypoint, moving to the opposite direction");
+
+			directionSpeed = -directionSpeed;
+
+			movingDirRecentlyChanged = true;
+			movingDirChangeTime = clock();
 		}
 	}
 
-	PrintAfterWaypointIsReached(waypoint);
+	PrintAfterWaypointIsReached(currLocation, waypoint);
 	StopMoving();
 
 	return;
 }
 
-float MovementManager::GetDirectionToMoveIn(double currYaw, double destYaw) const
+float MovementManager::GetTurningDirection(double currYaw, double destYaw) const
 {
 	if (currYaw > destYaw)
 	{
@@ -290,11 +308,16 @@ void MovementManager::PrintAfterMoving(
 	HamsterAPI::Log::i("Client", message);
 }
 
-void MovementManager::PrintAfterWaypointIsReached(Location * waypoint)
+void MovementManager::PrintAfterWaypointIsReached(Location currLocation, Location * waypoint)
 {
 	stringStream.flush();
 	string message;
-	stringStream << endl << "Reached waypoint (" << waypoint->x << ", " << waypoint->y << ")" << endl << endl;
+	stringStream << endl <<
+		"Reached waypoint (" << waypoint->x << ", " << waypoint->y << ")" << endl <<
+		"current location: " <<
+		"x = " << currLocation.x <<
+		", y = " << currLocation.y <<
+		", yaw = " << currLocation.yaw << endl << endl;
 	message = stringStream.str();
 	HamsterAPI::Log::i("Client", message);
 }
