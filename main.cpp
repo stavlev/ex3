@@ -54,14 +54,13 @@ int main()
 		Location currWaypoint;
 		double deltaX = 0, deltaY = 0, deltaYaw = 0;
 
+		movementManager.MoveTo(&robot, &hamsterStartLocation);
+		robot.UpdateLocation();
+
 		while (hamster->isConnected())
 		{
 			try
 			{
-				Location sheker = {.x = 50.0, .y = 50.0, .yaw = 0};
-				movementManager.MoveTo(&robot, &sheker);
-				robot.UpdateLocation();
-
 				/*displayManager.PrintRouteCvMat();
 				sleep(10);*/
 

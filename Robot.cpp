@@ -25,6 +25,7 @@ void Robot::Initialize(Location startLocation)
 	initialPose.setY(startLocation.y);
 	initialPose.setHeading(startLocation.yaw);
 
+	// The robot wouldn't start moving without the call to setInitialPose
 	sleep(3);
 	hamster->setInitialPose(initialPose);
 
