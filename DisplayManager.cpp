@@ -43,20 +43,19 @@ Location DisplayManager::ConvertToHamsterLocation(Location waypoint)
 	return hamsterLocation;
 }
 
-void DisplayManager::PrintWaypoints(bool convertToHamsterLocation)
+void DisplayManager::PrintWaypoints()
 {
-	Location currWaypoint, waypointToPrint;
+	Location currWaypoint, hamsterWaypoint;
 
 	for (int i = 0; i < numOfWaypoints; i++)
 	{
 		currWaypoint = waypoints.at(i);
+		hamsterWaypoint = ConvertToHamsterLocation(currWaypoint);
 
-		waypointToPrint = convertToHamsterLocation ?
-			ConvertToHamsterLocation(currWaypoint) : currWaypoint;
-
-		cout << "Waypoint " << i + 1 << ": " <<
-				"x = " << waypointToPrint.x <<
-				", y = " << waypointToPrint.y << endl;
+		cout << "Waypoint " << i << ": " <<
+				"(" << hamsterWaypoint.x << ", " << hamsterWaypoint.y << ")" << "\t" <<
+				"[original: " <<
+				"(" << currWaypoint.x << ", " << currWaypoint.y << ")]" << endl;
 	}
 }
 

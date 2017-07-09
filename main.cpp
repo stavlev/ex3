@@ -43,7 +43,7 @@ int main()
 		// Print the map including the planned route and chosen waypoints
 		DisplayManager displayManager = DisplayManager(&grid, plannedRoute, &waypoints, numOfWaypoints);
 		//displayManager.PrintRouteCvMat();
-		displayManager.PrintWaypoints(true);
+		displayManager.PrintWaypoints();
 
 		MovementManager movementManager(hamster);
 
@@ -73,7 +73,7 @@ int main()
 					movementManager.MoveTo(&robot, &hamsterWaypoint);
 					waypointIndex++;
 
-					robot.UpdateLocation();
+					/*robot.UpdateLocation();
 
 					deltaX = robot.GetDeltaX();
 					deltaY = robot.GetDeltaY();
@@ -83,7 +83,7 @@ int main()
 
 					localizationManager.UpdateParticles(deltaX, deltaY, deltaYaw);
 					displayManager.PrintRouteCvMat(localizationManager.GetParticles());
-					localizationManager.PrintParticles();
+					localizationManager.PrintParticles();*/
 				}
 
 				movementManager.StopMoving();

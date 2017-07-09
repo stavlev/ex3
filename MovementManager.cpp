@@ -18,7 +18,7 @@
 // Minimum time to wait between changing the wheels angle,
 // or else Hamster will not have the chance to complete its turning
 // in the chosen angle and would turn in the opposite direction again
-#define WHEELS_ANGLE_CHANGE_WAIT_TIME 5
+#define WHEELS_ANGLE_CHANGE_WAIT_TIME 3
 
 #define leftTurnAngle()		TURN_ANGLE
 #define rightTurnAngle()	-TURN_ANGLE
@@ -238,7 +238,7 @@ double MovementManager::CalculateMoveSpeedByDistanceFromWaypoint(double distance
 		return MAX_MOVE_SPEED;
 	}
 
-	double turnSpeed = (double)distanceFromWaypoint / 100;
+	double turnSpeed = (double)distanceFromWaypoint / 50;
 	return turnSpeed;
 }
 

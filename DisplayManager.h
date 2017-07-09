@@ -42,7 +42,7 @@ private:
 public:
 	DisplayManager(Grid * grid, string plannedRoute, vector<Location> * waypoints, int numOfWaypoints);
 	Location ConvertToHamsterLocation(Location waypoint);
-	void PrintWaypoints(bool convertToHamsterLocation);
+	void PrintWaypoints();
 	void PrintRouteCvMat();
 	void PrintRouteCvMat(vector<Particle *> particles);
 	virtual ~DisplayManager();

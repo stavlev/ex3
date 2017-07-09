@@ -32,11 +32,14 @@ void Robot::Initialize(Location startLocation)
 	initialPose.setY(hamsterStartY);
 	initialPose.setHeading(startLocation.yaw);
 
-	// The robot wouldn't start moving without the call to setInitialPose
+	// The call to setInitialPose sets the parameter pose as the relative
+	// origin of the robot's coordinate system.
+	// The robot wouldn't start moving without this call, and after calling it - the values
+	// returned from getPose would be relative to the initialPose we chose to set.
 	sleep(3);
 	hamster->setInitialPose(initialPose);
 
-	Location currLocation = GetCurrHamsterLocation(false);
+	cout << "Set Hamster initial pose at (" << hamsterStartX << ", " << hamsterStartY << ")" << endl;
 
 	//localizationManager->InitParticles();
 
@@ -58,7 +61,7 @@ double Robot::GetDeltaYaw() const
 	return currYaw - prevYaw;
 }
 
-Location Robot::GetCurrHamsterLocation(bool scaleToCm /* = true*/)
+Location Robot::GetCurrHamsterLocation()
 {
 	/*Particle * topParticle = localizationManager->GetTopParticle();
 
@@ -71,11 +74,10 @@ Location Robot::GetCurrHamsterLocation(bool scaleToCm /* = true*/)
 
 	Pose currPose = hamster->getPose();
 
-	double poseX = currPose.getX() - hamsterStartX;
-	double poseY = currPose.getY() - hamsterStartY;
-
-	double currX = /*scaleToCm ? (poseX * 100) :*/ (poseX);
-	double currY = /*scaleToCm ? (poseY * 100) :*/ (poseY);
+	// Substract the initial pose coordinates from the current pose to get
+	// coordinates relative to (0,0) instead of to the initial pose we set
+	double currX = (currPose.getX() - hamsterStartX) * 100;
+	double currY = (currPose.getY() - hamsterStartY) * 100;
 
 	double currYaw = currPose.getHeading();
 
@@ -95,11 +97,11 @@ Location Robot::GetCurrHamsterLocation(bool scaleToCm /* = true*/)
 
 void Robot::UpdateLocation()
 {
-	Location currentLocation = GetCurrHamsterLocation();
-
 	prevX = currX;
 	prevY = currY;
 	prevYaw = currYaw;
+
+	Location currentLocation = GetCurrHamsterLocation();
 
 	// Update the current and previous locations by the position of the robot
 	currX = currentLocation.x;

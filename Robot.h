@@ -38,7 +38,7 @@ public:
 	double GetDeltaX() const;
 	double GetDeltaY() const;
 	double GetDeltaYaw() const;
-	Location GetCurrHamsterLocation(bool scaleToCm = true);
+	Location GetCurrHamsterLocation();
 	void UpdateLocation();
 	virtual ~Robot();
 };
