@@ -76,8 +76,8 @@ Location Robot::GetCurrHamsterLocation()
 
 	// Substract the initial pose coordinates from the current pose to get
 	// coordinates relative to (0,0) instead of to the initial pose we set
-	double currX = (currPose.getX() - hamsterStartX) * 100;
-	double currY = (currPose.getY() - hamsterStartY) * 100;
+	double currX = (currPose.getX() - hamsterStartX) * 10;
+	double currY = (currPose.getY() - hamsterStartY) * 10;
 
 	double currYaw = currPose.getHeading();
 

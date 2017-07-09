@@ -70,7 +70,12 @@ int main()
 					// Convert cv::Mat location to HamsterAPI::Hamster location
 					hamsterWaypoint = displayManager.ConvertToHamsterLocation(currWaypoint);
 
-					movementManager.MoveTo(&robot, &hamsterWaypoint);
+					Location shekerWaypoint = {
+						.x = -hamsterWaypoint.y,
+						.y = hamsterWaypoint.x
+					};
+
+					movementManager.MoveTo(&robot, &shekerWaypoint);
 					waypointIndex++;
 
 					/*robot.UpdateLocation();

@@ -10,7 +10,6 @@
 
 #define ROBOT_SIZE_IN_CM 20
 
-
 #define X_START 470
 #define Y_START 470
 //#define YAW_START 120

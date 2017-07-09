@@ -5,14 +5,15 @@
 #include <time.h>
 #include <sstream>
 
-#define MAX_MOVE_SPEED 0.4
+#define MAP_ANGLE -30
 
+#define MAX_MOVE_SPEED 0.4
 #define MIN_TURN_SPEED 0.1
 #define MAX_TURN_SPEED 0.2
 
 #define TURN_ANGLE 45.0
 
-#define YAW_TOLERANCE 1
+#define YAW_TOLERANCE 1.05
 #define DISTANCE_FROM_WAYPOINT_TOLERANCE 5
 
 // Minimum time to wait between changing the wheels angle,
@@ -45,7 +46,7 @@ void MovementManager::MoveTo(Robot * robot, Location * waypoint)
 
 	double currYaw = currLocation.yaw;
 	double destYawInRad = atan2(deltaY, deltaX);
-	double destYawInDegrees = radiansToDegrees(destYawInRad);
+	double destYawInDegrees = radiansToDegrees(destYawInRad) + MAP_ANGLE;
 	const double destYaw = GetAdjustedYaw(destYawInDegrees);
 
 	PrintBeforeTurning(currLocation, waypoint, currYaw, destYaw);
