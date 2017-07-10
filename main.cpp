@@ -7,6 +7,8 @@
 #include "Robot.h"
 #include "MovementManager.h"
 
+#define DISTANCE_FROM_WAYPOINT_TOLERANCE 10
+
 int main()
 {
 	try
@@ -49,6 +51,7 @@ int main()
 
 		robot.Initialize(startLocation);
 
+		Location currLocation;
 		int waypointIndex = 0;
 		Location currWaypoint, hamsterWaypoint;
 		double deltaX = 0, deltaY = 0, deltaYaw = 0;
@@ -60,22 +63,37 @@ int main()
 		{
 			try
 			{
-				/*displayManager.PrintRouteCvMat();
-				sleep(20);*/
+				//displayManager.PrintRouteCvMat();
 
 				while (waypointIndex < numOfWaypoints)
 				{
+					currLocation = robot.GetCurrHamsterLocation();
+
 					currWaypoint = waypoints.at(waypointIndex);
 
 					// Convert cv::Mat location to HamsterAPI::Hamster location
 					hamsterWaypoint = displayManager.ConvertToHamsterLocation(currWaypoint);
 
-					/*Location shekerWaypoint = {
-						.x = -hamsterWaypoint.y,
-						.y = hamsterWaypoint.x
-					};
-*/
-					movementManager.NavigateToWaypoint(&hamsterWaypoint);
+					double distanceFromWaypoint =
+						sqrt(pow(currLocation.x - hamsterWaypoint.x, 2) +
+							 pow(currLocation.y - hamsterWaypoint.y, 2));
+
+					bool isWaypointReached = distanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
+
+					if (!isWaypointReached)
+					{
+						movementManager.NavigateToWaypoint(&hamsterWaypoint);
+					}
+					else
+					{
+						cout << endl <<
+							"Reached waypoint (" << hamsterWaypoint.x << ", " << hamsterWaypoint.y << ")" << endl <<
+							"current location: " <<
+							"x = " << currLocation.x <<
+							", y = " << currLocation.y <<
+							", yaw = " << currLocation.yaw << endl << endl;
+					}
+
 					waypointIndex++;
 
 					/*robot.UpdateLocation();

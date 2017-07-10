@@ -35,8 +35,10 @@ Location DisplayManager::ConvertToHamsterLocation(Location waypoint)
 
 	Location hamsterLocation =
 	{
-		.x = -(waypoint.y - (height/2) - hamsterStartY),
-		.y = (waypoint.x - (width/2) - hamsterStartX)
+		/*.x = -(waypoint.y - (height/2) - hamsterStartY),
+		.y = (waypoint.x - (width/2) - hamsterStartX)*/
+		.x = (waypoint.x - (width/2) - hamsterStartX),
+		.y = -(waypoint.y - (height/2) - hamsterStartY)
 	};
 
 	return hamsterLocation;

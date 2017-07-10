@@ -24,26 +24,21 @@ private:
 	Location prevLocation;
 	Location * waypoint;
 	double distanceFromWaypoint, prevDistanceFromWaypoint;
-	double currYaw, destYaw, currDeltaYaw, prevDeltaYaw;
+	double currYaw, destYaw, currDeltaYaw;
 	double turnSpeed, moveSpeed;
-	std::stringstream stringStream;
 	string chosenDirectionName;
 
 	float wheelsAngle;
-	clock_t navigationStartTime;
-	clock_t wheelsAngleChangeTime;
-	bool wheelsAngleRecentlyChanged;
 	bool locationChanged;
 
 	void TurnToWaypoint();
 	void MoveToWaypoint();
-	void MoveBackwards();
 
-	void RecalculateTurningDirection();
 	double GetAdjustedYaw(double yawToAdjust) const;
+	void RecalculateTurningDirection();
 	void RecalculateDistanceFromWaypoint();
-	double CalculateTurnSpeedByDeltaYaw() const;
-	double CalculateMoveSpeedByDistanceFromWaypoint();
+	void CalculateTurnSpeedByDeltaYaw();
+	void CalculateMoveSpeedByDistanceFromWaypoint();
 	void PrintBeforeTurning();
 	void PrintAfterTurning();
 	void PrintAfterMoving();
