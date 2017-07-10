@@ -5,7 +5,7 @@
 #define NUMBER_OF_PARTICLES 1000
 #define MAX_NUM_OF_WAYPOINTS 100
 
-#define MAX_DIRECTIONS_DIFF_BETWEEN_WAYPOINTS 4
+#define MAX_PIXEL_DIFF_BETWEEN_WAYPOINTS 10
 
 int WayPointsManager::CalculateWaypoints(string plannedRoute, Location startLocation, Location goalLocation)
 {
@@ -38,7 +38,7 @@ int WayPointsManager::CalculateWaypoints(string plannedRoute, Location startLoca
 
 			bool isCurrPointContinuationOfWay =
 					currDirectionIndex == prevDirectionIndex &&
-					directionsCounter <= MAX_DIRECTIONS_DIFF_BETWEEN_WAYPOINTS;
+					directionsCounter <= MAX_PIXEL_DIFF_BETWEEN_WAYPOINTS;
 			bool isWaypoint = directionsCounter == 0 || isCurrPointContinuationOfWay;
 
 			if (isWaypoint)

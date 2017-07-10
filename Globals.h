@@ -8,7 +8,7 @@
 #ifndef GLOBALS_H_
 #define GLOBALS_H_
 
-#define ROBOT_SIZE_IN_CM 20
+#define ROBOT_SIZE_IN_CM 40
 
 #define X_START 470
 #define Y_START 470
