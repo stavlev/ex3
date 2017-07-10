@@ -45,7 +45,7 @@ int main()
 		//displayManager.PrintRouteCvMat();
 		displayManager.PrintWaypoints();
 
-		MovementManager movementManager(hamster);
+		MovementManager movementManager(hamster, &robot);
 
 		robot.Initialize(startLocation);
 
@@ -75,7 +75,7 @@ int main()
 						.y = hamsterWaypoint.x
 					};
 */
-					movementManager.MoveTo(&robot, &hamsterWaypoint);
+					movementManager.NavigateToWaypoint(&hamsterWaypoint);
 					waypointIndex++;
 
 					/*robot.UpdateLocation();

@@ -19,20 +19,39 @@ class MovementManager
 {
 private:
 	HamsterAPI::Hamster * hamster;
+	Robot * robot;
+	Location currLocation;
+	Location prevLocation;
+	Location * waypoint;
+	double distanceFromWaypoint, prevDistanceFromWaypoint;
+	double currYaw, destYaw, currDeltaYaw, prevDeltaYaw;
+	double turnSpeed, moveSpeed;
 	std::stringstream stringStream;
-	float GetTurningDirection(double currYaw, double destYaw) const;
+	string chosenDirectionName;
+
+	float wheelsAngle;
+	clock_t navigationStartTime;
+	clock_t wheelsAngleChangeTime;
+	bool wheelsAngleRecentlyChanged;
+	bool locationChanged;
+
+	void TurnToWaypoint();
+	void MoveToWaypoint();
+	void MoveBackwards();
+
+	void RecalculateTurningDirection();
 	double GetAdjustedYaw(double yawToAdjust) const;
-	double CalculateDistanceFromWaypoint(Location * currLocation, Location * waypoint) const;
-	double CalculateTurnSpeedByDeltaYaw(double deltaYaw, bool didWheelsAngleRecentlyChange) const;
-	double CalculateMoveSpeedByDistanceFromWaypoint(double distanceFromWaypoint);
-	void PrintBeforeTurning(Location currLocation, Location * waypoint, double currYaw, double destYaw);
-	void PrintAfterTurning(string directionName, Location currLocation, double currYaw, double currDeltaYaw, double turnSpeed);
-	void PrintAfterMoving(string directionName, Location currLocation, double currYaw, double distanceFromWaypoint, double moveSpeed);
-	void PrintAfterWaypointIsReached(Location currLocation, Location * waypoint);
+	void RecalculateDistanceFromWaypoint();
+	double CalculateTurnSpeedByDeltaYaw() const;
+	double CalculateMoveSpeedByDistanceFromWaypoint();
+	void PrintBeforeTurning();
+	void PrintAfterTurning();
+	void PrintAfterMoving();
+	void PrintAfterWaypointIsReached();
 
 public:
-	MovementManager(HamsterAPI::Hamster * hamster);
-	void MoveTo(Robot * robot, Location * waypoint);
+	MovementManager(HamsterAPI::Hamster * hamster, Robot * robot);
+	void NavigateToWaypoint(Location * waypoint);
 	void StopMoving() ;
 	virtual ~MovementManager();
 };
