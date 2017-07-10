@@ -68,15 +68,7 @@ void MovementManager::NavigateToWaypoint(Location * waypoint)
 			}
 			else
 			{
-				cout << "Moving Backwards" << endl;
-
-				// Move backwards trying to avoid the obstacle that the robot got stuck in
-				for (int i = 0; i < 1000000; i++)
-				{
-					hamster->sendSpeed(-0.1, 0.0);
-				}
-
-				navigationStartTime = clock();
+				MoveBackwards();
 			}
 		}
 		else
@@ -223,6 +215,19 @@ void MovementManager::CalculateMoveSpeedByDistanceFromWaypoint()
 	}
 
 	moveSpeed = (double)distanceFromWaypoint / 50;
+}
+
+void MovementManager::MoveBackwards()
+{
+	cout << "Moving Backwards" << endl;
+
+	// Move backwards trying to avoid the obstacle that the robot got stuck in
+	for (int i = 0; i < 1000000; i++)
+	{
+		hamster->sendSpeed(-0.15, 0.0);
+	}
+
+	navigationStartTime = clock();
 }
 
 void MovementManager::PrintBeforeTurning()

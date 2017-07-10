@@ -41,6 +41,7 @@ private:
 	void RecalculateDistanceFromWaypoint();
 	void CalculateTurnSpeedByDeltaYaw();
 	void CalculateMoveSpeedByDistanceFromWaypoint();
+	void MoveBackwards();
 	void PrintBeforeTurning();
 	void PrintAfterTurning();
 	void PrintAfterMoving();

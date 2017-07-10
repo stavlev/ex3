@@ -84,8 +84,7 @@ int main()
 					}
 					else
 					{
-						cout << endl <<
-							"Reached waypoint (" << hamsterWaypoint.x << ", " << hamsterWaypoint.y << ")" << endl;
+						cout << endl << "Reached waypoint (" << hamsterWaypoint.x << ", " << hamsterWaypoint.y << ")" << endl << endl;
 					}
 
 					waypointIndex++;
