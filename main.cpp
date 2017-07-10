@@ -7,8 +7,6 @@
 #include "Robot.h"
 #include "MovementManager.h"
 
-#define DISTANCE_FROM_WAYPOINT_TOLERANCE 10
-
 int main()
 {
 	try
@@ -87,11 +85,7 @@ int main()
 					else
 					{
 						cout << endl <<
-							"Reached waypoint (" << hamsterWaypoint.x << ", " << hamsterWaypoint.y << ")" << endl <<
-							"current location: " <<
-							"x = " << currLocation.x <<
-							", y = " << currLocation.y <<
-							", yaw = " << currLocation.yaw << endl << endl;
+							"Reached waypoint (" << hamsterWaypoint.x << ", " << hamsterWaypoint.y << ")" << endl;
 					}
 
 					waypointIndex++;

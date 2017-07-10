@@ -11,10 +11,10 @@
 #define MIN_TURN_SPEED 0.1
 #define MAX_TURN_SPEED 0.2
 
-#define TURN_ANGLE 45.0
-
 #define YAW_TOLERANCE 1.05
-#define DISTANCE_FROM_WAYPOINT_TOLERANCE 10
+#define NAVIGATION_TIMEOUT_IN_SECONDS 15
+
+#define TURN_ANGLE 45.0
 
 #define leftTurnAngle()		TURN_ANGLE
 #define rightTurnAngle()	-TURN_ANGLE
@@ -42,11 +42,13 @@ void MovementManager::NavigateToWaypoint(Location * waypoint)
 	double destYawInDegrees = radiansToDegrees(destYawInRad) + MAP_ANGLE;
 	destYaw = GetAdjustedYaw(destYawInDegrees);
 
+	RecalculateDistanceFromWaypoint();
 	RecalculateTurningDirection();
 
 	locationChanged = true;
-
 	bool isWaypointReached = false;
+
+	navigationStartTime = clock();
 
 	while (!isWaypointReached)
 	{
@@ -56,19 +58,36 @@ void MovementManager::NavigateToWaypoint(Location * waypoint)
 
 		if (currDeltaYaw > YAW_TOLERANCE)
 		{
-			// Keep turning in the chosen direction while the robot's angle is different than the destination angle
-			RecalculateTurningDirection();
-			TurnToWaypoint();
+			bool isStuck = ((clock() - navigationStartTime) / CLOCKS_PER_SEC) >= NAVIGATION_TIMEOUT_IN_SECONDS;
+
+			if (!isStuck)
+			{
+				// Keep turning in the chosen direction while the robot's angle is different than the destination angle
+				RecalculateTurningDirection();
+				TurnToWaypoint();
+			}
+			else
+			{
+				cout << "Moving Backwards" << endl;
+
+				// Move backwards trying to avoid the obstacle that the robot got stuck in
+				for (int i = 0; i < 1000000; i++)
+				{
+					hamster->sendSpeed(-0.1, 0.0);
+				}
+
+				navigationStartTime = clock();
+			}
 		}
 		else
 		{
 			// Keep moving in the chosen direction while the robot is not too close to the waypoint
 			cout << "Reached destination yaw, moving forward towards waypoint" << endl;
-			//RecalculateDistanceFromWaypoint();
 			MoveToWaypoint();
 		}
 
-		isWaypointReached = distanceFromWaypoint > DISTANCE_FROM_WAYPOINT_TOLERANCE;
+		RecalculateDistanceFromWaypoint();
+		isWaypointReached = distanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
 	}
 
 	PrintAfterWaypointIsReached();

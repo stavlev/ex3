@@ -15,6 +15,8 @@
 using namespace std;
 using namespace HamsterAPI;
 
+#define DISTANCE_FROM_WAYPOINT_TOLERANCE 5
+
 class MovementManager
 {
 private:
@@ -27,7 +29,7 @@ private:
 	double currYaw, destYaw, currDeltaYaw;
 	double turnSpeed, moveSpeed;
 	string chosenDirectionName;
-
+	clock_t navigationStartTime;
 	float wheelsAngle;
 	bool locationChanged;
 
