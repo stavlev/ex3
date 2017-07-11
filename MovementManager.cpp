@@ -27,7 +27,10 @@ MovementManager::MovementManager(HamsterAPI::Hamster * hamster, Robot * robot)
 
 void MovementManager::StopMoving()
 {
-	hamster->sendSpeed(0.0, 0.0);
+	for (int i = 0; i < 1000000; i++)
+	{
+		hamster->sendSpeed(0.0, 0.0);
+	}
 }
 
 // The parameter waypoint should be according to Hamster's coordinate system
@@ -37,8 +40,8 @@ void MovementManager::NavigateToWaypoint(Location * waypoint)
 	this->waypoint = waypoint;
 
 	double destYawInRad =
-		atan2((waypoint->y - currLocation.y),
-			  (waypoint->x - currLocation.x));
+		atan2((waypoint->x - currLocation.x),
+			  (waypoint->y - currLocation.y));
 	double destYawInDegrees = radiansToDegrees(destYawInRad) + MAP_ANGLE;
 	destYaw = GetAdjustedYaw(destYawInDegrees);
 
@@ -46,7 +49,7 @@ void MovementManager::NavigateToWaypoint(Location * waypoint)
 	RecalculateTurningDirection();
 
 	locationChanged = true;
-	bool isWaypointReached = false;
+	isWaypointReached = false;
 
 	navigationStartTime = clock();
 
@@ -56,30 +59,32 @@ void MovementManager::NavigateToWaypoint(Location * waypoint)
 		currYaw = currLocation.yaw;
 		currDeltaYaw = fabs(destYaw - currYaw);
 
-		if (currDeltaYaw > YAW_TOLERANCE)
+		if (currDeltaYaw <= YAW_TOLERANCE)
+		{
+			// Keep moving in the chosen direction while the robot is not too close to the waypoint
+			cout << "Reached destination yaw, moving forward towards waypoint " <<
+					"(" << waypoint->x << ", " << waypoint->y << ")" << endl;
+			RecalculateDistanceFromWaypoint();
+			MoveToWaypoint();
+		}
+		else
 		{
 			bool isStuck = ((clock() - navigationStartTime) / CLOCKS_PER_SEC) >= NAVIGATION_TIMEOUT_IN_SECONDS;
 
-			if (!isStuck)
+			if (isStuck)
+			{
+				MoveBackwards();
+			}
+			else
 			{
 				// Keep turning in the chosen direction while the robot's angle is different than the destination angle
 				RecalculateTurningDirection();
 				TurnToWaypoint();
 			}
-			else
-			{
-				MoveBackwards();
-			}
-		}
-		else
-		{
-			// Keep moving in the chosen direction while the robot is not too close to the waypoint
-			cout << "Reached destination yaw, moving forward towards waypoint" << endl;
-			MoveToWaypoint();
 		}
 
-		RecalculateDistanceFromWaypoint();
-		isWaypointReached = distanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
+		//RecalculateDistanceFromWaypoint();
+		//isWaypointReached = distanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
 	}
 
 	PrintAfterWaypointIsReached();
@@ -114,9 +119,9 @@ void MovementManager::MoveToWaypoint()
 	CalculateMoveSpeedByDistanceFromWaypoint();
 	hamster->sendSpeed(moveSpeed, 0.0);
 
-	currLocation = robot->GetCurrHamsterLocation();
+	/*currLocation = robot->GetCurrHamsterLocation();
 	prevDistanceFromWaypoint = distanceFromWaypoint;
-	RecalculateDistanceFromWaypoint();
+	RecalculateDistanceFromWaypoint();*/
 
 	locationChanged = prevDistanceFromWaypoint != distanceFromWaypoint;
 
@@ -172,11 +177,15 @@ double MovementManager::GetAdjustedYaw(double yawToAdjust) const
 
 void MovementManager::RecalculateDistanceFromWaypoint()
 {
+	prevDistanceFromWaypoint = distanceFromWaypoint;
+
 	currLocation = robot->GetCurrHamsterLocation();
 
 	distanceFromWaypoint =
 		sqrt(pow(currLocation.x - waypoint->x, 2) +
 			 pow(currLocation.y - waypoint->y, 2));
+
+	isWaypointReached = distanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
 }
 
 // Calculate the turn speed according to the current delta yaw in a circular way (0 = 360),

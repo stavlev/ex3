@@ -30,15 +30,10 @@ DisplayManager::DisplayManager(Grid * grid, string plannedRoute, vector<Location
 
 Location DisplayManager::ConvertToHamsterLocation(Location waypoint)
 {
-	double hamsterStartX = startCol - (width/2);
-	double hamsterStartY = startRow - (height/2);
-
 	Location hamsterLocation =
 	{
-		/*.x = -(waypoint.y - (height/2) - hamsterStartY),
-		.y = (waypoint.x - (width/2) - hamsterStartX)*/
-		.x = (waypoint.x - (width/2) - hamsterStartX),
-		.y = -(waypoint.y - (height/2) - hamsterStartY)
+		.x = -(waypoint.y - startRow),
+		.y =  (waypoint.x - startCol)
 	};
 
 	return hamsterLocation;
