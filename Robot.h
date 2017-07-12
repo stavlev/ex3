@@ -28,12 +28,12 @@ private:
 	LocalizationManager * localizationManager;
 	double prevX, prevY, prevYaw, currX, currY, currYaw;
 	int inflationRadius;
-	double mapHeight, mapWidth;
+	double mapHeight, mapWidth, mapResolution;
 
 public:
 	Robot(
 		Hamster * hamster, LocalizationManager * localizationManager, int inflationRadius,
-		double mapHeight, double mapWidth);
+		double mapHeight, double mapWidth, double mapResolution);
 	void Initialize(Location startLocation);
 	double GetDeltaX() const;
 	double GetDeltaY() const;

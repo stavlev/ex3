@@ -2,13 +2,14 @@
 
 Robot::Robot(
 	Hamster * hamster, LocalizationManager * localizationManager, int inflationRadius,
-	double mapHeight, double mapWidth)
+	double mapHeight, double mapWidth, double mapResolution)
 {
 	this->hamster = hamster;
 	this->localizationManager = localizationManager;
 	this->inflationRadius = inflationRadius;
 	this->mapHeight = mapHeight;
 	this->mapWidth = mapWidth;
+	this->mapResolution = mapResolution;
 
 	this->prevX = 0;
 	this->prevY = 0;

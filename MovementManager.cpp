@@ -19,10 +19,11 @@
 #define leftTurnAngle()		TURN_ANGLE
 #define rightTurnAngle()	-TURN_ANGLE
 
-MovementManager::MovementManager(HamsterAPI::Hamster * hamster, Robot * robot)
+MovementManager::MovementManager(HamsterAPI::Hamster * hamster, Robot * robot, DisplayManager * displayManager)
 {
 	this->hamster = hamster;
 	this->robot = robot;
+	this->displayManager = displayManager;
 }
 
 void MovementManager::StopMoving()
@@ -60,15 +61,23 @@ void MovementManager::NavigateToWaypoint(Location * waypoint)
 		{
 			bool isStuck = ((clock() - navigationStartTime) / CLOCKS_PER_SEC) >= NAVIGATION_TIMEOUT_IN_SECONDS;
 
-			if (isStuck)
-			{
-				MoveBackwards();
-			}
-			else
+			if (!isStuck)
 			{
 				// Keep turning in the chosen direction while the robot's angle is different than the destination angle
 				RecalculateTurningDirection();
 				TurnToWaypoint();
+			}
+			else
+			{
+				cout << "Moving Backwards" << endl;
+
+				// Move backwards trying to avoid the obstacle that the robot got stuck in
+				for (int i = 0; i < 1000000; i++)
+				{
+					hamster->sendSpeed(-0.1, 0.0);
+				}
+
+				navigationStartTime = clock();
 			}
 		}
 		else
@@ -79,6 +88,7 @@ void MovementManager::NavigateToWaypoint(Location * waypoint)
 		}
 
 		RecalculateDistanceFromWaypoint();
+		displayManager->PrintRouteCvMat();
 		isWaypointReached = distanceFromWaypoint <= DISTANCE_FROM_WAYPOINT_TOLERANCE;
 	}
 
@@ -215,19 +225,6 @@ void MovementManager::CalculateMoveSpeedByDistanceFromWaypoint()
 	}
 
 	moveSpeed = (double)distanceFromWaypoint / 50;
-}
-
-void MovementManager::MoveBackwards()
-{
-	cout << "Moving Backwards" << endl;
-
-	// Move backwards trying to avoid the obstacle that the robot got stuck in
-	for (int i = 0; i < 1000000; i++)
-	{
-		hamster->sendSpeed(-0.15, 0.0);
-	}
-
-	navigationStartTime = clock();
 }
 
 void MovementManager::PrintBeforeTurning()

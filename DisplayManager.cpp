@@ -32,7 +32,7 @@ Location DisplayManager::ConvertToHamsterLocation(Location waypoint)
 {
 	Location hamsterLocation =
 	{
-		.x =  (waypoint.x - startCol),
+		.x = (waypoint.x - startCol),
 		.y = -(waypoint.y - startRow)
 	};
 
