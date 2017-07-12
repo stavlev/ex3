@@ -21,6 +21,11 @@
 #define YAW_START 0
 */
 
+/*
+#define X_GOAL 655
+#define Y_GOAL 370
+*/
+
 #define X_GOAL 370
 #define Y_GOAL 630
 

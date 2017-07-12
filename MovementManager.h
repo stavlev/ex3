@@ -31,7 +31,7 @@ private:
 	string chosenDirectionName;
 	clock_t navigationStartTime;
 	float wheelsAngle;
-	bool locationChanged, isWaypointReached;
+	bool locationChanged;
 
 	void TurnToWaypoint();
 	void MoveToWaypoint();

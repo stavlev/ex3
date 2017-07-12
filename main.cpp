@@ -6,6 +6,14 @@
 #include "DisplayManager.h"
 #include "Robot.h"
 #include "MovementManager.h"
+#include <thread>
+
+using namespace std;
+
+void printWaypointsOnMap(DisplayManager displayManager)
+{
+	displayManager.PrintRouteCvMat();
+}
 
 int main()
 {
@@ -45,6 +53,12 @@ int main()
 		//displayManager.PrintRouteCvMat();
 		displayManager.PrintWaypoints();
 
+		// Construct a new thread and run it. Does not block execution.
+		std::thread showMapThread(printWaypointsOnMap, displayManager);
+
+		// Make the main thread wait for the new thread to finish execution, therefore block its own execution.
+		showMapThread.join();
+
 		MovementManager movementManager(hamster, &robot);
 
 		robot.Initialize(startLocation);
@@ -53,9 +67,6 @@ int main()
 		int waypointIndex = 0;
 		Location currWaypoint, hamsterWaypoint;
 		double deltaX = 0, deltaY = 0, deltaYaw = 0;
-
-		/*movementManager.MoveTo(&robot, &hamsterStartLocation);
-		robot.UpdateLocation();*/
 
 		while (hamster->isConnected())
 		{

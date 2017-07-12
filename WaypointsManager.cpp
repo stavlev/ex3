@@ -65,6 +65,7 @@ int WayPointsManager::CalculateWaypoints(string plannedRoute, Location startLoca
 		}
 	}
 
+	//goalLocation.y = -goalLocation.y;
 	waypoints.at(numOfWaypoints) = goalLocation;
 
 	return numOfWaypoints;
