@@ -8,8 +8,13 @@
 #ifndef MOVEMENTMANAGER_H_
 #define MOVEMENTMANAGER_H_
 
+#include "Location.h"
 #include "Robot.h"
 #include "DisplayManager.h"
+#include "HamsterAPIClientCPP/Hamster.h"
+#include <vector>
+using namespace std;
+using namespace HamsterAPI;
 
 #define DISTANCE_FROM_WAYPOINT_TOLERANCE 5
 
@@ -18,7 +23,6 @@ class MovementManager
 private:
 	HamsterAPI::Hamster * hamster;
 	Robot * robot;
-	DisplayManager * displayManager;
 	Location currLocation;
 	Location prevLocation;
 	Location * waypoint;
@@ -29,6 +33,7 @@ private:
 	clock_t navigationStartTime;
 	float wheelsAngle;
 	bool locationChanged;
+	DisplayManager * displayManager;
 
 	void TurnToWaypoint();
 	void MoveToWaypoint();

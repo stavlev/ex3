@@ -30,10 +30,15 @@ DisplayManager::DisplayManager(Grid * grid, string plannedRoute, vector<Location
 
 Location DisplayManager::ConvertToHamsterLocation(Location waypoint)
 {
+	double hamsterStartX = startCol - (width/2);
+	double hamsterStartY = startRow - (height/2);
+
 	Location hamsterLocation =
 	{
-		.x = (waypoint.x - startCol),
-		.y = -(waypoint.y - startRow)
+		/*.x = -(waypoint.y - (height/2) - hamsterStartY),
+		.y = (waypoint.x - (width/2) - hamsterStartX)*/
+		.x = (waypoint.x - (width/2) - hamsterStartX),
+		.y = -(waypoint.y - (height/2) - hamsterStartY)
 	};
 
 	return hamsterLocation;
@@ -59,7 +64,7 @@ void DisplayManager::PrintRouteCvMat()
 {
 	InitMapWithRoute();
 
-	sleep(1);
+	//sleep(1);
 	cv::namedWindow("OccupancyGrid-view-route");
 	cv::imshow("OccupancyGrid-view-route", routeCvMat);
 	cv::waitKey(1);

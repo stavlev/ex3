@@ -7,13 +7,6 @@
 #include "Robot.h"
 #include "MovementManager.h"
 
-using namespace std;
-
-void printWaypointsOnMap(DisplayManager displayManager)
-{
-	displayManager.PrintRouteCvMat();
-}
-
 int main()
 {
 	try
@@ -37,7 +30,7 @@ int main()
 		Grid grid = map.grid;
 
 		LocalizationManager localizationManager(hamster, occupancyGrid, mapHeight, mapWidth, mapResolution);
-		Robot robot(hamster, &localizationManager, map.inflationRadius, mapHeight, mapWidth, mapResolution);
+		Robot robot(hamster, &localizationManager, map.inflationRadius, mapHeight, mapWidth);
 
 		PathPlanner pathPlanner = PathPlanner(&grid);
 		string plannedRoute = pathPlanner.plannedRoute;
@@ -49,6 +42,7 @@ int main()
 
 		// Print the map including the planned route and chosen waypoints
 		DisplayManager displayManager = DisplayManager(&grid, plannedRoute, &waypoints, numOfWaypoints);
+		//displayManager.PrintRouteCvMat();
 		displayManager.PrintWaypoints();
 
 		MovementManager movementManager(hamster, &robot, &displayManager);
@@ -60,10 +54,15 @@ int main()
 		Location currWaypoint, hamsterWaypoint;
 		double deltaX = 0, deltaY = 0, deltaYaw = 0;
 
+		/*movementManager.MoveTo(&robot, &hamsterStartLocation);
+		robot.UpdateLocation();*/
+
 		while (hamster->isConnected())
 		{
 			try
 			{
+				//displayManager.PrintRouteCvMat();
+
 				while (waypointIndex < numOfWaypoints)
 				{
 					currLocation = robot.GetCurrHamsterLocation();
@@ -85,7 +84,8 @@ int main()
 					}
 					else
 					{
-						cout << endl << "Reached waypoint (" << hamsterWaypoint.x << ", " << hamsterWaypoint.y << ")" << endl << endl;
+						cout << endl <<
+							"Reached waypoint (" << hamsterWaypoint.x << ", " << hamsterWaypoint.y << ")" << endl;
 					}
 
 					waypointIndex++;
